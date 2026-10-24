@@ -9,6 +9,61 @@
 
 ---
 
+## 2026-10-25 — v0.5: Q-014 Каталог ресурсов + Q-013 Почвы/Флора/Фауна ⭐ MAJOR
+
+**Тип**: MAJOR (масштабное наполнение мировых данных)
+
+**Что сделано**:
+- Q-014 (каталог ресурсов) → RESOLVED. Создано **13 категорий, ~210 ресурсов**
+- Q-013 (почвы/флора/фауна) → RESOLVED. Создано:
+  - **32 Reference Soil Groups** по WRB 2014/2022
+  - **~150-200 видов растений** (по 11 биомам + 8 Vavilov Centers)
+  - **~140 видов животных** (по 11 биомам + 22 домашних)
+- Созданы поддиректории: `docs/ai/02_world/resources/`, `soils/`, `flora/`, `fauna/`
+- Все ресурсы с реальными географическими месторождениями, технологическими цепочками, достоверными источниками
+- Сводные таблицы по каждой категории
+- Циклы развития (металлургия, текстиль, красители, ювелирное дело, и т.д.)
+- Принципы для дизайна (географические монополии, 'бутылочные горлышки', кросс-тех зависимости)
+
+**Новые файлы** (17):
+- `docs/ai/02_world/resources/README.md` — методология каталога
+- `docs/ai/02_world/resources/01_minerals_ores.md` — 28 металлов/руд
+- `docs/ai/02_world/resources/02_stone_construction.md` — 17 камней/стройматериалов
+- `docs/ai/02_world/resources/03_clays_refractories.md` — 9 глин/огнеупоров
+- `docs/ai/02_world/resources/04_organic_fuels.md` — 8 топлив
+- `docs/ai/02_world/resources/05_wood_timber.md` — 24 вида деревьев
+- `docs/ai/02_world/resources/06_fibers_textiles.md` — 16 волокон
+- `docs/ai/02_world/resources/07_dyes_pigments.md` — 18 красителей
+- `docs/ai/02_world/resources/08_food_resources.md` — 38 пищевых
+- `docs/ai/02_world/resources/09_hides_leather.md` — 11 кож
+- `docs/ai/02_world/resources/10_gems_ornamental.md` — 21 драг.камень
+- `docs/ai/02_world/resources/11_spices_medicinal.md` — 35 пряностей/лекарств
+- `docs/ai/02_world/resources/12_water_salt.md` — 7 вода/соль
+- `docs/ai/02_world/resources/13_salts_minerals_chem.md` — 12 хим.минералов
+- `docs/ai/02_world/soils/README.md` — 32 WRB почвы
+- `docs/ai/02_world/flora/README.md` — ~150-200 растений
+- `docs/ai/02_world/fauna/README.md` — ~140 животных
+
+**Обновлённые файлы**:
+- `_meta/decision_log.md` — добавлены записи Q-014 и Q-013
+- `_meta/open_questions.md` — Q-013 и Q-014 переведены в RESOLVED
+- `_meta/project_status.md` — v0.5
+- `_meta/session_memory.md` — запись о сессии 8
+- `_meta/reasoning_log.md` — рассуждения по наполнению каталогов
+
+**Источники (достоверные)**:
+- USGS Mineral Commodity Summaries, Mindat.org (минералы)
+- Vavilov Centers of Origin (одомашнивание)
+- FAO (сельское хозяйство)
+- Plants of the World Online (POWO) (растения)
+- IUCN Red List, GBIF, CITES (животные)
+- FishBase (рыбы)
+- WRB 2014/2022, USDA Soil Taxonomy, SoilGrids 250m (почвы)
+- FAO DAD-IS (породы дом. животных)
+- Mammal Species of the World, BirdLife International (таксономия)
+
+---
+
 ## 2026-10-25 — v0.4: Система активации (BOOT.md + шаблон промпта)
 
 **Тип**: MAJOR (процедура запуска памяти)
