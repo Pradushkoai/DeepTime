@@ -760,7 +760,7 @@
 - AI соседи: уровень контакта, отношения
 - Собственность: подпись текущего состояния + чек-лист прав
 
-**См.**: [discussions/questions/07_visibility.md](../../discussions/questions/07_visibility.md)
+**См.**: [discussions/questions/08_visibility.md](../../discussions/questions/08_visibility.md)
 
 ---
 
