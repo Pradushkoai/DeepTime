@@ -32,6 +32,7 @@
 | items | 107 | 105 | 107 | 0 | ✅ |
 | tech:processes | 20 | 0 | 20 | 0 | ✅ |
 | tech:tech_tree | 67 | 0 | 67 | 0 | ✅ |
+| tech:research_system | 0 | 0 | 0 | 0 | ✅ |
 | tech:dependencies_graph | 10 | 1 | 10 | 0 | ✅ |
 
 ### Рекомендации
