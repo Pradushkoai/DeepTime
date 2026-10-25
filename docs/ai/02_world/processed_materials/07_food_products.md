@@ -136,7 +136,7 @@
 - В игре: сахар = стратегический товар для хранения фруктов зимой
 **Источники»: «Sugar» (Mintz, 1985)
 
-### Мёд (см. [../resources/08_food_resources.md](../resources/08_food_resources.md))
+#### Мёд (см. [../resources/08_food_resources.md](../resources/08_food_resources.md))
 
 (уже описан как природный ресурс)
 **Дополнительно**: 
