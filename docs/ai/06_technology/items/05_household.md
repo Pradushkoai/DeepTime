@@ -299,3 +299,24 @@
 - [../../02_world/resources/03_clays_refractories.md](../../02_world/resources/03_clays_refractories.md) — глина
 - [../../02_world/resources/06_fibers_textiles.md](../../02_world/resources/06_fibers_textiles.md) — ткани
 - [../../02_world/processed_materials/08_hygiene_textile_products.md](../../02_world/processed_materials/08_hygiene_textile_products.md) — свечи, краски
+
+
+## Урна погребальная
+
+**Категория**: ритуальное изделие
+**Состав**: керамика (глина обожжённая)
+**Процесс**: формовка + обжиг (T-014 керамика)
+**Назначение**: хранение праха после кремации (ритуал погребения)
+
+**Входящие связи**:
+- сырьё: глина → [02_world/resources/03_clays_refractories.md]
+- процесс: обжиг → [06_technology/processes.md]
+- технология: T-014 (керамика) → [06_technology/tech_tree.md]
+
+**Исходящие связи**:
+- ритуал погребения → [06_technology/items/07_cult_ritual.md]
+
+**Роль**: ритуальное изделие анта/античности, индикатор уровня культуры
+
+**Источники**:
+- Чильде В. Г. (1954) — Древнейший Восток в свете новых раскопок
