@@ -18,6 +18,18 @@ const ARCHETYPES = {
 const NAMES_M = ['Борис','Карл','Олаф','Сигурд','Эрик','Хрольв','Гуннар','Торстен','Свен','Рагнар','Ивар','Бьорн','Ульф','Кнуд','Хакон'];
 const NAMES_F = ['Анна','Хельга','Фрейя','Сигрид','Тора','Ингрид','Астрид','Рагнхильд','Гудрун','Сольвейг','Брунхильда','Торгунна','Эльза','Карин'];
 
+// Technology catalog (paleolithic → neolithic basics)
+const TECH_CATALOG = {
+  0: { name:'Контроль огня', desc:'Огонь готовит еду и греет', unlocked:true, cost:0 },
+  1: { name:'Каменные орудия', desc:'Кремневые ножи и скребки', unlocked:true, cost:0 },
+  2: { name:'Собирательство', desc:'Базовый сбор растений', unlocked:true, cost:0 },
+  3: { name:'Лук и стрелы', desc:'×2 эффективность охоты', cost:100, category:'hunt' },
+  4: { name:'Рыболовные сети', desc:'×2 эффективность рыбалки', cost:100, category:'fish' },
+  5: { name:'Плетёные корзины', desc:'+50% к хранению ягод', cost:80, category:'gather' },
+  6: { name:'Гончарное дело', desc:'Хранение жидкостей, варка', cost:120, category:'build' },
+  7: { name:'Земледелие', desc:'Посадка злаков — переход к осёдлости', cost:200, category:'build' },
+};
+
 // Points of interest in settlement (x, z coordinates in world space)
 const POI = {
   fire:     { x: 0,    z: 0,    type: 'fire',    label: '🔥 Костёр' },
@@ -50,7 +62,10 @@ function initWorld(archetype='FOREST', population=50, seed=42) {
     pendingEvents: [], resolvedEvents: [], chronicle: [],
     priorities: { food:40, stockpile:30, build:10, army:5, trade:5 },
     techs: new Set([0,1,2]),
-    metrics: { totalEvents:0, totalDecisions:0, wintersSurvived:0, maxPressure:0, turnsPlayed:0 },
+    techProgress: { 3:0, 4:0, 5:0, 6:0, 7:0 }, // T-3..T-7 progress 0-100
+    techUnlocked: {}, // {techId: true} when unlocked
+    techNotifications: [], // [{id, name, desc}] for UI popup
+    metrics: { totalEvents:0, totalDecisions:0, wintersSurvived:0, maxPressure:0, turnsPlayed:0, techsUnlocked:0 },
     nextEventId: 1,
     // Real-time state
     seasonProgress: 0, // 0..1, fills up, when 1 → season change
@@ -120,6 +135,23 @@ function genSkills(rng, arch) {
   const s = arch.skills;
   return { hunt:rng.randint(s.hunt[0],s.hunt[1]), gather:rng.randint(s.gather[0],s.gather[1]),
            fish:rng.randint(s.fish[0],s.fish[1]), build:rng.randint(s.build[0],s.build[1]) };
+}
+
+function addTechProgress(w, techId, amount) {
+  if (w.techUnlocked[techId]) return; // already unlocked
+  if (!w.techProgress[techId]) w.techProgress[techId] = 0;
+  w.techProgress[techId] += amount;
+  const tech = TECH_CATALOG[techId];
+  if (w.techProgress[techId] >= tech.cost) {
+    w.techUnlocked[techId] = true;
+    w.metrics.techsUnlocked++;
+    w.techNotifications.push({ id: techId, name: tech.name, desc: tech.desc });
+    w.chronicle.push({ year: w.year, season: w.season, entry: `🔓 Открыто: ${tech.name} — ${tech.desc}` });
+  }
+}
+
+function dismissTechNotification(techId) {
+  WORLD.techNotifications = WORLD.techNotifications.filter(t => t.id !== techId);
 }
 
 function aliveCitizens(w) { return w.citizens.filter(c => c.alive); }
@@ -199,45 +231,50 @@ function updateCitizenRT(w, c, dt) {
     // Produce resources while working
     if (c.action === 'HUNT' && c.workTimer > 2.0) {
       c.workTimer = 0;
-      // Kill the target animal if still alive
       if (c.huntTarget && c.huntTarget.alive) {
         c.huntTarget.alive = false;
-        // Respawn after delay
         setTimeout(() => { if (c.huntTarget) { c.huntTarget.alive = true; c.huntTarget.x = -10 + Math.random()*20; c.huntTarget.z = -10 + Math.random()*20; } }, 10000);
       }
       const arch = ARCHETYPES[w.archetype];
+      const huntBonus = w.techUnlocked[3] ? 2 : 1; // Лук и стрелы ×2
       const succ = Math.min(1, c.huntSkill/60 + 0.4);
-      const meat = Math.max(2, Math.round(succ * 5 * arch.hunt * 2.5));
+      const meat = Math.max(2, Math.round(succ * 5 * arch.hunt * 2.5 * huntBonus));
       w.settlement.meat += meat;
       c.carrying = { type: 'meat', amount: meat };
       c.huntTarget = null;
-      // Go to storage to drop off
+      addTechProgress(w, 3, 2); // progress toward Лук и стрелы
       c.targetX = POI.storage.x + (Math.random()-0.5)*2;
       c.targetZ = POI.storage.z + (Math.random()-0.5)*2;
       c.action = 'CARRY';
     } else if (c.action === 'GATHER' && c.workTimer > 2.5) {
       c.workTimer = 0;
       const arch = ARCHETYPES[w.archetype];
+      const gatherBonus = w.techUnlocked[5] ? 1.5 : 1; // Корзины +50%
       const succ = Math.min(1, c.gatherSkill/60 + 0.5);
-      const berries = Math.max(1, Math.round(succ * 4 * arch.gather * 4));
+      const berries = Math.max(1, Math.round(succ * 4 * arch.gather * 4 * gatherBonus));
       w.settlement.berries += berries;
       c.carrying = { type: 'berries', amount: berries };
+      addTechProgress(w, 5, 2);
       c.targetX = POI.storage.x + (Math.random()-0.5)*2;
       c.targetZ = POI.storage.z + (Math.random()-0.5)*2;
       c.action = 'CARRY';
     } else if (c.action === 'FISH' && c.workTimer > 3.0) {
       c.workTimer = 0;
       const arch = ARCHETYPES[w.archetype];
+      const fishBonus = w.techUnlocked[4] ? 2 : 1; // Сети ×2
       const succ = Math.min(1, c.fishSkill/60 + 0.5);
-      const fish = Math.max(1, Math.round(succ * 3 * arch.fish * 3));
+      const fish = Math.max(1, Math.round(succ * 3 * arch.fish * 3 * fishBonus));
       w.settlement.fish += fish;
       c.carrying = { type: 'fish', amount: fish };
+      addTechProgress(w, 4, 2);
       c.targetX = POI.storage.x + (Math.random()-0.5)*2;
       c.targetZ = POI.storage.z + (Math.random()-0.5)*2;
       c.action = 'CARRY';
     } else if (c.action === 'BUILD' && c.workTimer > 5.0) {
       c.workTimer = 0;
       w.settlement.wood = Math.max(0, w.settlement.wood - 1);
+      addTechProgress(w, 6, 3); // Гончарное дело
+      addTechProgress(w, 7, 1); // Земледелие (медленнее)
       c.targetX = POI.storage.x + (Math.random()-0.5)*2;
       c.targetZ = POI.storage.z + (Math.random()-0.5)*2;
       c.action = 'CARRY';
@@ -616,6 +653,14 @@ function getState(w) {
     metrics: w.metrics,
     citizens: ac.slice(0, 60).map(c => ({ x:c.x, z:c.z, action:c.action, hunger:c.hunger, age:c.age, carrying:!!c.carrying })),
     animals: w.animals.filter(a => a.alive).map(a => ({ x:a.x, z:a.z })),
+    techs: Object.keys(TECH_CATALOG).map(id => {
+      const tid = parseInt(id);
+      const t = TECH_CATALOG[tid];
+      const unlocked = tid < 3 || w.techUnlocked[tid];
+      const progress = w.techProgress[tid] || 0;
+      return { id: tid, name: t.name, desc: t.desc, unlocked, progress, cost: t.cost, category: t.category };
+    }),
+    techNotifications: w.techNotifications,
     gameOver: ac.length === 0,
     seasonProgress: w.seasonProgress,
     paused: w.paused,

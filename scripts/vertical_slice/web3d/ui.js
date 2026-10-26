@@ -113,6 +113,37 @@ function updateUI() {
   document.getElementById('mWinters').textContent = s.metrics.wintersSurvived;
   document.getElementById('mPressure').textContent = s.metrics.maxPressure;
 
+  // Technologies
+  let tHtml = '';
+  for (const t of s.techs) {
+    const cls = t.unlocked ? 'unlocked' : 'locked';
+    const pct = t.unlocked ? 100 : Math.min(100, Math.floor(t.progress / t.cost * 100));
+    const icon = t.unlocked ? '✅' : '🔒';
+    tHtml += `<div class="techItem ${cls}">
+      <div class="techName">${icon} ${t.name}</div>
+      <div class="techDesc">${t.desc}</div>`;
+    if (!t.unlocked) tHtml += `<div class="techBar"><div class="techBarFill" style="width:${pct}%"></div></div>`;
+    tHtml += '</div>';
+  }
+  document.getElementById('techList').innerHTML = tHtml;
+
+  // Tech notification popup
+  if (s.techNotifications && s.techNotifications.length > 0) {
+    const tn = s.techNotifications[0];
+    const el = document.getElementById('techNotif');
+    if (el.dataset.techId !== String(tn.id)) {
+      el.innerHTML = `<div class="tnIcon">🔓</div>
+        <div class="tnTitle">${tn.name}</div>
+        <div class="tnDesc">${tn.desc}</div>
+        <button class="tnBtn" onclick="dismissTechNotification(${tn.id});document.getElementById('techNotif').style.display='none';document.getElementById('techNotif').dataset.techId=''">Отлично!</button>`;
+      el.style.display = 'block';
+      el.dataset.techId = tn.id;
+    }
+  } else {
+    document.getElementById('techNotif').style.display = 'none';
+    document.getElementById('techNotif').dataset.techId = '';
+  }
+
   // Priorities (sliders)
   if (!document.getElementById('priFood').dataset.init) {
     document.getElementById('priFood').value = s.priorities.food;
