@@ -1,0 +1,64 @@
+{
+  "config": {
+    "seed": 42,
+    "strategy": "random",
+    "archetype": "TROPICAL",
+    "population": 50,
+    "turns": 100
+  },
+  "summary": {
+    "turns_played": 100,
+    "years_simulated": 25,
+    "population_start": 50,
+    "population_final": 90,
+    "population_change": 40,
+    "hungry_final": 30,
+    "winters_survived": 25,
+    "total_events": 79,
+    "total_decisions": 79,
+    "decisions_per_hour": 47.4,
+    "max_chief_pressure": 27,
+    "reforms_completed": 4,
+    "chief_age": 27,
+    "chief_era": "YOUNG",
+    "chief_legitimacy": 80,
+    "chronicle_entries": 26
+  },
+  "events_by_type": {
+    "CHAMPION_PROPOSES": 10,
+    "WEDDING": 3,
+    "GOOD_HARVEST": 5,
+    "WINTER_COMING": 14,
+    "BIRTH_NOTABLE": 18,
+    "RITUAL_OF_YEAR": 16,
+    "DEATH_ELDER": 9,
+    "FACTION_GRIEVANCE": 3,
+    "HUNGER": 1
+  },
+  "death_causes": {
+    "старость": 9,
+    "болезнь": 1,
+    "голод": 5
+  },
+  "factions_final": {
+    "Охотники": {
+      "power": 74,
+      "grievance": 0
+    },
+    "Жречество": {
+      "power": 15,
+      "grievance": 90
+    },
+    "Старейшины": {
+      "power": 40,
+      "grievance": 0
+    }
+  },
+  "verdict": {
+    "tribe_survived": true,
+    "chief_alive": true,
+    "no_rebellions": false
+  },
+  "verdict_score": 2,
+  "verdict_label": "✅⚠️❌ выжили с проблемами"
+}

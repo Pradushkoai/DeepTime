@@ -1,0 +1,62 @@
+{
+  "config": {
+    "seed": 1000,
+    "strategy": "auto",
+    "archetype": "DESERT",
+    "population": 50,
+    "turns": 100
+  },
+  "summary": {
+    "turns_played": 100,
+    "years_simulated": 25,
+    "population_start": 50,
+    "population_final": 78,
+    "population_change": 28,
+    "hungry_final": 0,
+    "winters_survived": 25,
+    "total_events": 87,
+    "total_decisions": 87,
+    "decisions_per_hour": 52.199999999999996,
+    "max_chief_pressure": 60,
+    "reforms_completed": 9,
+    "chief_age": 32,
+    "chief_era": "MATURE",
+    "chief_legitimacy": 80,
+    "chronicle_entries": 21
+  },
+  "events_by_type": {
+    "WINTER_COMING": 11,
+    "RITUAL_OF_YEAR": 20,
+    "DEATH_ELDER": 13,
+    "WEDDING": 1,
+    "BIRTH_NOTABLE": 17,
+    "CHAMPION_PROPOSES": 9,
+    "GOOD_HARVEST": 3,
+    "HUNGER": 13
+  },
+  "death_causes": {
+    "старость": 13,
+    "голод": 24
+  },
+  "factions_final": {
+    "Охотники": {
+      "power": 77,
+      "grievance": 0
+    },
+    "Жречество": {
+      "power": 15,
+      "grievance": 0
+    },
+    "Старейшины": {
+      "power": 44,
+      "grievance": 0
+    }
+  },
+  "verdict": {
+    "tribe_survived": true,
+    "chief_alive": true,
+    "no_rebellions": true
+  },
+  "verdict_score": 3,
+  "verdict_label": "✅✅✅ идеально"
+}

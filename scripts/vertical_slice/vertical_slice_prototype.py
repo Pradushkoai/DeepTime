@@ -137,6 +137,31 @@ ARCHETYPE_CALORIE_SHARES = {
 }
 
 
+# D-009 — стартовые навыки по архетипу (бонусы к "своим" занятиям)
+ARCHETYPE_STARTING_SKILLS = {
+    TribeArchetype.FOREST:       {"hunt": (20, 45), "gather": (25, 50), "fish": (15, 30), "build": (15, 30)},
+    TribeArchetype.STEPPE:       {"hunt": (40, 65), "gather": (15, 30), "fish": (10, 20), "build": (10, 25)},
+    TribeArchetype.RIVER_VALLEY: {"hunt": (15, 30), "gather": (25, 45), "fish": (40, 65), "build": (15, 30)},
+    TribeArchetype.COASTAL:      {"hunt": (15, 30), "gather": (15, 30), "fish": (50, 70), "build": (15, 30)},
+    TribeArchetype.MOUNTAIN:     {"hunt": (35, 60), "gather": (20, 35), "fish": (10, 20), "build": (20, 35)},
+    TribeArchetype.DESERT:       {"hunt": (25, 45), "gather": (30, 50), "fish": (15, 25), "build": (15, 30)},
+    TribeArchetype.TROPICAL:     {"hunt": (15, 30), "gather": (40, 65), "fish": (25, 45), "build": (15, 30)},
+    TribeArchetype.ARCTIC:       {"hunt": (45, 70), "gather": (10, 20), "fish": (25, 45), "build": (15, 30)},
+}
+
+
+def _gen_skills_for_archetype(rng, archetype):
+    """Сгенерировать навыки в зависимости от архетипа (D-009)"""
+    s = ARCHETYPE_STARTING_SKILLS[archetype]
+    return {
+        "hunt": rng.randint(*s["hunt"]),
+        "gather": rng.randint(*s["gather"]),
+        "fish": rng.randint(*s["fish"]),
+        "build": rng.randint(*s["build"]),
+        "craft": rng.randint(5, 20),
+    }
+
+
 # ============================================================================
 # DATA: ГРАЖДАНИН (T-002 — Citizen archetype)
 # ============================================================================
@@ -493,16 +518,20 @@ def system_production(world: WorldState):
             skill_mult = 0.5
 
         if c.current_action == ActionType.HUNT:
-            # Успех зависит от навыка + сезона
+            # Успех зависит от навыка + сезона + архетипа
             success = min(1.0, c.hunt_skill / 60 + 0.4) * skill_mult * season_mult
-            # Мясо за успешную охоту — 2-4 единицы
-            meat_gained += max(1, int(round(success * 3))) if success > 0.3 else 0
+            # Мясо за успешную охоту — зависит от доли охоты в архетипе
+            # Если архетип охотничий (STEPPE 0.70) — больше мяса
+            # Если собирательный (TROPICAL 0.20) — меньше
+            meat_gained += max(1, int(round(success * 3 * shares["hunt"] * 2.5))) if success > 0.3 else 0
         elif c.current_action == ActionType.GATHER:
             success = min(1.0, c.gather_skill / 60 + 0.5) * skill_mult * season_mult
-            berries_gained += max(1, int(round(success * 4))) if success > 0.3 else 0
+            # Ягоды зависят от доли собирательства — поднято (×3 вместо ×2)
+            berries_gained += max(1, int(round(success * 4 * shares["gather"] * 3))) if success > 0.3 else 0
         elif c.current_action == ActionType.FISH:
             success = min(1.0, c.fish_skill / 60 + 0.5) * skill_mult * season_mult
-            fish_gained += max(1, int(round(success * 3))) if success > 0.3 else 0
+            # Рыба зависит от доли рыболовства
+            fish_gained += max(1, int(round(success * 3 * shares["fish"] * 2.5))) if success > 0.3 else 0
         elif c.current_action == ActionType.BUILD:
             wood_gained += 1
             stone_gained += 1
@@ -613,10 +642,11 @@ def system_factions(world: WorldState):
         f.power = min(100, int(elders_count / max(1, total_alive) * 100) + 25)
 
     # Обида растёт, если давление вождя высокое (D-004)
-    if world.chief and world.chief.pressure > 60:
+    # v0.35: порог 80 вместо 60 — менее агрессивно
+    if world.chief and world.chief.pressure > 80:
         for f in world.factions.values():
             if f.grievance < 80:
-                f.grievance = min(100, f.grievance + 5)
+                f.grievance = min(100, f.grievance + 3)  # было +5
                 if not f.grievance_reason:
                     f.grievance_reason = "давление вождя высокое"
 
@@ -629,37 +659,38 @@ def system_chief(world: WorldState):
     - Голод граждан
     - Смерть граждан
     - Кризисов (хищник, болезнь, неурожай)
+
+    v0.35: снижен рост давления для баланса
     """
     if not world.chief:
         return
 
     chief = world.chief
 
-    # Давление от голода
+    # Давление от голода — снижено (max +5 вместо +15)
     hungry = sum(1 for c in world.citizens.values() if c.alive and c.hunger > 60)
     if hungry > 0:
-        pressure_gain = min(15, hungry // 2)
+        pressure_gain = min(5, hungry // 4)
         chief.pressure = min(100, chief.pressure + pressure_gain)
 
-    # Давление от зимы (D-015 — онбординг «зима идёт»)
+    # Давление от зимы — снижено (+2 вместо +5)
     if world.season == Season.WINTER:
-        chief.pressure = min(100, chief.pressure + 5)
+        chief.pressure = min(100, chief.pressure + 2)
 
-    # Давление от недавних смертей (по хронике)
+    # Давление от недавних смертей — снижено (recent*1 вместо *3)
     recent_deaths = sum(1 for entry in world.chronicle[-5:]
                        if "погиб" in entry.get("entry", "") or "умер" in entry.get("entry", "")
                        or "Болезнь" in entry.get("entry", "") or "Жёсткая" in entry.get("entry", ""))
     if recent_deaths > 0:
-        chief.pressure = min(100, chief.pressure + recent_deaths * 3)
+        chief.pressure = min(100, chief.pressure + recent_deaths * 1)
 
-    # Давление от обиды фракций
+    # Давление от обиды фракций — убрано (обида уже влияет через фракции)
+    # total_grievance не влияет на давление вождя
+
+    # Давление спадает активнее, если всё хорошо
     total_grievance = sum(f.grievance for f in world.factions.values())
-    if total_grievance > 100:
-        chief.pressure = min(100, chief.pressure + (total_grievance - 100) // 10)
-
-    # Давление спадает, если всё хорошо
     if hungry == 0 and recent_deaths == 0 and total_grievance < 50:
-        chief.pressure = max(0, chief.pressure - 1)
+        chief.pressure = max(0, chief.pressure - 2)  # было -1
 
     # Обновление эры
     if chief.age < 30:
@@ -672,9 +703,76 @@ def system_chief(world: WorldState):
         chief.era = ChiefEra.DECLINING
 
     # Проверка смерти вождя (D-001 — от первого из двух: возраст/давление)
+    # ВАЖНО: триггерим только ОДИН раз — если уже есть pending CHIEF_DEATH, не дублируем
     if chief.age >= 80 or chief.pressure >= 100 or chief.health <= 0:
-        # Триггерим событие смены вождя
-        _fire_event(world, EventType.CHIEF_DEATH, EventPriority.CRITICAL)
+        already_pending = any(e.type == EventType.CHIEF_DEATH for e in world.pending_events)
+        if not already_pending:
+            _fire_event(world, EventType.CHIEF_DEATH, EventPriority.CRITICAL)
+
+
+def handle_chief_death(world: WorldState, choice_label: str):
+    """Обработка смерти вождя — создание нового (D-001, R9)
+
+    Вызывается из resolve_event при выборе в CHIEF_DEATH/CHIEF_SUCCESSION.
+    """
+    old_chief = world.chief
+    old_pressure = old_chief.pressure
+
+    # Создаём нового вождя (наследника или нового гражданина)
+    rng = world.rng
+
+    # Ищем наследника
+    heir_id = old_chief.heir_id
+    if heir_id == -1 or heir_id not in world.citizens or not world.citizens[heir_id].alive:
+        # Нет наследника — берём случайного взрослого
+        candidates = [c for c in world.citizens.values()
+                     if c.alive and 18 <= c.age <= 40 and c.id != old_chief.citizen_id]
+        if not candidates:
+            # Все умерли — берём любого живого
+            candidates = [c for c in world.citizens.values() if c.alive]
+        if not candidates:
+            return  # некому стать вождём
+        heir = rng.choice(candidates)
+        heir_id = heir.id
+
+    heir = world.citizens[heir_id]
+
+    # R9 — предохранители спиралей
+    if choice_label == "Долг отцов":
+        # Давление наследуется полностью, гасится 5/год
+        new_pressure = old_pressure
+    elif choice_label == "Новая метла":
+        # Давление обнуляется
+        new_pressure = 0
+    else:
+        new_pressure = old_pressure // 2  # по умолчанию 50%
+
+    # Помечаем старого вождя как мёртвого
+    if old_chief.citizen_id in world.citizens:
+        old_citizen = world.citizens[old_chief.citizen_id]
+        old_citizen.alive = False
+        old_citizen.death_cause = "вождь (передача власти)"
+
+    # Создаём нового вождя
+    world.chief = Chief(
+        citizen_id=heir.id,
+        name=heir.name,
+        age=heir.age,
+        era=ChiefEra.YOUNG if heir.age < 30 else ChiefEra.MATURE,
+        health=80,
+        legitimacy=max(50, old_chief.legitimacy - 10),
+        pressure=new_pressure,
+        reign_start_year=world.year,
+        heir_id=-1,
+        completed_reforms=[],
+    )
+
+    # Записываем в хронику
+    world.chronicle.append({
+        "year": world.year,
+        "season": world.season.name,
+        "entry": f"{heir.name} стал новым вождём (давление {new_pressure})"
+    })
 
 
 def system_aging_and_death(world: WorldState):
@@ -965,14 +1063,15 @@ def system_events_check(world: WorldState):
 
     # 3. Обида фракций > 80
     for ftype, f in world.factions.items():
-        if f.grievance > 80 and not any(
+        if f.grievance > 90 and not any(
             e.type == EventType.FACTION_GRIEVANCE and e.text.startswith(f.name)
             for e in world.pending_events
         ):
             _fire_event(world, EventType.FACTION_GRIEVANCE, EventPriority.HIGH, faction=ftype)
 
     # 4. Чемпион реформ (GDD §14) — редкое, раз в 5-10 лет
-    if world.rng.random() < 0.05:
+    # v0.35: поднято с 5% до 10%
+    if world.rng.random() < 0.10:
         alive_citizens = [c for c in world.citizens.values() if c.alive and c.age >= 25]
         if alive_citizens:
             champion = world.rng.choice(alive_citizens)
@@ -1020,6 +1119,12 @@ def resolve_event(world: WorldState, event: GameEvent, choice_index: int):
 
     choice = event.choices[choice_index]
     cons = choice.consequences
+
+    # Спецобработка CHIEF_DEATH / CHIEF_SUCCESSION — передаём власть (D-001, R9)
+    if event.type in (EventType.CHIEF_DEATH, EventType.CHIEF_SUCCESSION):
+        handle_chief_death(world, choice.label)
+        # Не применяем обычные chief_pressure consequences — уже обработано
+        cons = {k: v for k, v in cons.items() if k != "chief_pressure"}
 
     # Применяем consequences
     if "chief_pressure" in cons:
@@ -1293,15 +1398,18 @@ def init_world(archetype: TribeArchetype = TribeArchetype.FOREST,
     world.settlement.stone = 20
     world.settlement.hides = 10
 
-    # Вождь (D-001)
+    # Вождь (D-001) — с навыками по архетипу + бонус вождя
     chief_id = 1
     chief_name = _gen_name(rng, Gender.MALE)
+    chief_skills = _gen_skills_for_archetype(rng, archetype)
     chief_citizen = Citizen(
         id=chief_id, name=chief_name, gender=Gender.MALE,
         age=rng.randint(25, 35), birth_year=world.year - 30,
-        hunt_skill=rng.randint(50, 70),
-        gather_skill=rng.randint(20, 40),
-        fish_skill=rng.randint(30, 50),
+        hunt_skill=min(100, chief_skills["hunt"] + 20),
+        gather_skill=chief_skills["gather"],
+        fish_skill=chief_skills["fish"],
+        build_skill=chief_skills["build"],
+        craft_skill=chief_skills["craft"],
         loyalty=90,
         family_role="head",
     )
@@ -1314,7 +1422,7 @@ def init_world(archetype: TribeArchetype = TribeArchetype.FOREST,
         reign_start_year=world.year,
     )
 
-    # Граждане
+    # Граждане — с навыками по архетипу (D-009)
     for i in range(2, population + 1):
         gender = rng.choice([Gender.MALE, Gender.FEMALE])
         age = rng.choices(
@@ -1322,13 +1430,14 @@ def init_world(archetype: TribeArchetype = TribeArchetype.FOREST,
             weights=[30, 40, 20, 10]
         )[0]
         name = _gen_name(rng, gender)
+        skills = _gen_skills_for_archetype(rng, archetype)
         c = Citizen(
             id=i, name=name, gender=gender, age=age, birth_year=world.year - age,
-            hunt_skill=rng.randint(15, 40),
-            gather_skill=rng.randint(20, 50),
-            fish_skill=rng.randint(15, 40),
-            build_skill=rng.randint(5, 25),
-            craft_skill=rng.randint(5, 20),
+            hunt_skill=skills["hunt"],
+            gather_skill=skills["gather"],
+            fish_skill=skills["fish"],
+            build_skill=skills["build"],
+            craft_skill=skills["craft"],
             loyalty=rng.randint(50, 80),
         )
         world.citizens[i] = c
@@ -1429,31 +1538,130 @@ def print_summary(world: WorldState):
         print(f"⚠️ {rebellious} фракций в ярости")
 
 
+def collect_metrics(world: WorldState, run_config: dict) -> dict:
+    """Собрать метрики прогона для JSON-вывода (T-008)"""
+    alive = sum(1 for c in world.citizens.values() if c.alive)
+    hungry = sum(1 for c in world.citizens.values() if c.alive and c.hunger > 60)
+    total_turns = world.metrics["turns_played"]
+    years = total_turns // 4
+
+    # События по типам
+    events_by_type = {}
+    for ev in world.resolved_events:
+        et = ev["event_type"]
+        events_by_type[et] = events_by_type.get(et, 0) + 1
+
+    # Причины смерти
+    death_causes = {}
+    for c in world.citizens.values():
+        if not c.alive and c.death_cause:
+            death_causes[c.death_cause] = death_causes.get(c.death_cause, 0) + 1
+
+    # Фракции
+    factions_state = {}
+    for ftype, f in world.factions.items():
+        factions_state[f.name] = {
+            "power": f.power,
+            "grievance": f.grievance,
+        }
+
+    # Вердикт
+    verdict = {
+        "tribe_survived": alive >= 30,
+        "chief_alive": world.chief.pressure < 100 and world.chief.age < 80,
+        "no_rebellions": all(f.grievance < 80 for f in world.factions.values()),
+    }
+    verdict_score = sum(verdict.values())  # 0-3
+
+    return {
+        "config": run_config,
+        "summary": {
+            "turns_played": total_turns,
+            "years_simulated": years,
+            "population_start": run_config["population"],
+            "population_final": alive,
+            "population_change": alive - run_config["population"],
+            "hungry_final": hungry,
+            "winters_survived": world.metrics["winters_survived"],
+            "total_events": world.metrics["total_events"],
+            "total_decisions": world.metrics["total_decisions"],
+            "decisions_per_hour": (world.metrics["total_decisions"] / (total_turns / 60)) if total_turns > 0 else 0,
+            "max_chief_pressure": world.metrics["max_pressure"],
+            "reforms_completed": len(world.chief.completed_reforms),
+            "chief_age": world.chief.age,
+            "chief_era": world.chief.era.name,
+            "chief_legitimacy": world.chief.legitimacy,
+            "chronicle_entries": len(world.chronicle),
+        },
+        "events_by_type": events_by_type,
+        "death_causes": death_causes,
+        "factions_final": factions_state,
+        "verdict": verdict,
+        "verdict_score": verdict_score,  # 0-3 (3 = идеально)
+        "verdict_label": ["❌❌❌ гибель", "⚠️❌❌ тяжело", "✅⚠️❌ выжили с проблемами", "✅✅✅ идеально"][verdict_score],
+    }
+
+
 def main():
-    print("=" * 70)
-    print("DeepTime — Vertical Slice Prototype (Python, headless)")
-    print("Проверка ядра симуляции: D-001 вождь, D-004 фракции, D-015 контракт,")
-    print("D-016 события, T-002 ECS, T-003 LOD, T-005 EventSystem, T-008 метрики")
-    print("=" * 70)
+    import argparse
+    parser = argparse.ArgumentParser(description="DeepTime Vertical Slice Prototype")
+    parser.add_argument("--seed", type=int, default=42, help="RNG seed")
+    parser.add_argument("--strategy", choices=["auto", "random", "smart"], default="smart",
+                       help="AI strategy for event choices")
+    parser.add_argument("--archetype", type=str, default="FOREST",
+                       choices=["FOREST", "STEPPE", "RIVER_VALLEY", "COASTAL",
+                               "MOUNTAIN", "DESERT", "TROPICAL", "ARCTIC"],
+                       help="Tribe archetype (D-009)")
+    parser.add_argument("--population", type=int, default=50, help="Starting population")
+    parser.add_argument("--turns", type=int, default=100, help="Number of turns to simulate")
+    parser.add_argument("--print-every", type=int, default=10, help="Print state every N turns (0 = silent)")
+    parser.add_argument("--json", type=str, default="", help="Save metrics to JSON file")
+    parser.add_argument("--quiet", action="store_true", help="No stdout output")
+    args = parser.parse_args()
+
+    archetype = TribeArchetype[args.archetype]
+
+    if not args.quiet:
+        print("=" * 70)
+        print("DeepTime — Vertical Slice Prototype (Python, headless)")
+        print(f"seed={args.seed} strategy={args.strategy} archetype={args.archetype} "
+              f"pop={args.population} turns={args.turns}")
+        print("=" * 70)
 
     # Инициализация
-    world = init_world(archetype=TribeArchetype.FOREST, population=50, seed=42)
-    print(f"\nСтарт: {world.settlement.name}, {world.archetype.name}")
-    print(f"Вождь: {world.chief.name}, возраст {world.chief.age}")
-    print(f"Население: {len(world.citizens)}")
+    world = init_world(archetype=archetype, population=args.population, seed=args.seed)
 
-    # Симуляция 100 ходов (25 лет)
-    NUM_TURNS = 100
-    PRINT_EVERY = 10  # вывод каждые 10 ходов
+    if not args.quiet:
+        print(f"\nСтарт: {world.settlement.name}, {world.archetype.name}")
+        print(f"Вождь: {world.chief.name}, возраст {world.chief.age}")
+        print(f"Население: {len(world.citizens)}")
 
-    for turn in range(1, NUM_TURNS + 1):
-        simulate_turn(world, ai_choice_strategy="smart")
+    # Симуляция
+    for turn in range(1, args.turns + 1):
+        simulate_turn(world, ai_choice_strategy=args.strategy)
 
-        if turn % PRINT_EVERY == 0 or turn == 1:
+        if args.print_every > 0 and (turn % args.print_every == 0 or turn == 1):
             print_state(world, turn)
 
     # Итоговый отчёт
-    print_summary(world)
+    if not args.quiet:
+        print_summary(world)
+
+    # JSON-вывод
+    if args.json:
+        run_config = {
+            "seed": args.seed,
+            "strategy": args.strategy,
+            "archetype": args.archetype,
+            "population": args.population,
+            "turns": args.turns,
+        }
+        metrics = collect_metrics(world, run_config)
+        import json
+        with open(args.json, "w", encoding="utf-8") as f:
+            json.dump(metrics, f, ensure_ascii=False, indent=2)
+        if not args.quiet:
+            print(f"\n📄 Метрики сохранены: {args.json}")
 
 
 if __name__ == "__main__":
