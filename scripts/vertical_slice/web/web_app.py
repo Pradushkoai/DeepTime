@@ -187,10 +187,161 @@ def get_state_dict():
     }
 
 
-@app.route("/")
-def index():
+# ============================================================================
+# QUEST MODE — Twine-style нарратив
+# ============================================================================
+
+def get_quest_state():
+    """Сгенерировать нарративное состояние для квест-режима"""
+    world = get_world()
+    alive = [c for c in world.citizens.values() if c.alive]
+    alive_count = len(alive)
+    hungry = sum(1 for c in alive if c.hunger > 60)
+    s = world.settlement
+    chief = world.chief
+
+    # Сезонные описания
+    season_narrative = {
+        Season.SPRING: "Весна. Снег тает, реки разливаются. Первые ростки пробиваются из земли.",
+        Season.SUMMER: "Лето. Солнце печёт, ягоды спеют, стада жиреют. Время изобилия.",
+        Season.AUTUMN: "Осень. Листья желтеют, воздух холодеет. Нужно готовиться к зиме.",
+        Season.WINTER: "Зима. Земля замёрзла, еду не добыть. Племя выживает на запасах.",
+    }[world.season]
+
+    # Состояние запасов (нарратив)
+    total_food = s.meat + s.berries + s.fish
+    if total_food > alive_count * 5:
+        food_status = "Запасов вдоволь — племя сыто."
+    elif total_food > alive_count * 2:
+        food_status = "Запасы есть, но их нужно беречь."
+    elif total_food > alive_count:
+        food_status = "Запасы тают. Голод близко."
+    elif total_food > 0:
+        food_status = "Запасы на исходе. Люди голодают."
+    else:
+        food_status = "Склады пусты. Племя голодает."
+
+    # Состояние вождя (нарратив)
+    if chief.pressure < 30:
+        chief_status = f"{chief.name} спокоен и уверен. Племя доверяет вождю."
+    elif chief.pressure < 60:
+        chief_status = f"{chief.name} чувствует напряжение. Что-то нужно менять."
+    elif chief.pressure < 80:
+        chief_status = f"{chief.name} на грани. Тяжесть власти давит на плечи."
+    else:
+        chief_status = f"{chief.name} сломлен. Давление невыносимо. Вождь может не пережить эту зиму."
+
+    # Фракции (нарратив)
+    factions_text = []
+    for f in world.factions.values():
+        if f.grievance < 30:
+            tone = "довольны"
+        elif f.grievance < 60:
+            tone = "ворчат"
+        elif f.grievance < 90:
+            tone = "ропщут"
+        else:
+            tone = "готовят мятеж"
+        factions_text.append(f"{f.name} {tone} (обида {f.grievance})")
+
+    # Текущее событие (если есть)
+    current_event = None
+    if world.pending_events:
+        ev = world.pending_events[0]
+        current_event = {
+            "id": ev.id,
+            "title": ev.title,
+            "text": ev.text,
+            "choices": [{"label": ch.label, "description": ch.description} for ch in ev.choices],
+            "priority": ev.priority.name,
+        }
+
+    # Хроника как история (последние 8)
+    chronicle = list(reversed(world.chronicle[-8:]))
+
+    # Последние решения (3)
+    recent = list(reversed(world.resolved_events[-3:]))
+
+    return {
+        "turn": world.turn,
+        "year": world.year,
+        "season": world.season.name,
+        "season_narrative": season_narrative,
+        "alive": alive_count,
+        "hungry": hungry,
+        "food_status": food_status,
+        "chief_status": chief_status,
+        "chief_name": chief.name,
+        "chief_age": chief.age,
+        "chief_era": chief.era.name,
+        "chief_pressure": chief.pressure,
+        "factions_text": "; ".join(factions_text),
+        "current_event": current_event,
+        "chronicle": chronicle,
+        "recent_decisions": recent,
+        "meat": s.meat,
+        "berries": s.berries,
+        "fish": s.fish,
+        "game_over": alive_count == 0,
+        "winters_survived": world.metrics["winters_survived"],
+        "archetype": world.archetype.name,
+    }
+
+
+@app.route("/quest")
+def quest():
+    state = get_quest_state()
+    return render_template("quest.html", state=state, config=GAME_CONFIG)
+
+
+@app.route("/quest/next", methods=["POST"])
+def quest_next():
+    """Сделать ход в квест-режиме"""
+    world = get_world()
+    if not world.pending_events:
+        simulate_turn(world, ai_choice_strategy=GAME_CONFIG["strategy"])
+    return redirect(url_for("quest"))
+
+
+@app.route("/quest/resolve/<int:event_id>/<int:choice_idx>", methods=["POST"])
+def quest_resolve(event_id, choice_idx):
+    """Разрешить событие в квест-режиме"""
+    world = get_world()
+    for i, ev in enumerate(world.pending_events):
+        if ev.id == event_id:
+            resolve_event(world, ev, choice_idx)
+            world.pending_events.remove(ev)
+            break
+    return redirect(url_for("quest"))
+
+
+@app.route("/quest/reset", methods=["POST"])
+def quest_reset():
+    """Сброс в квест-режиме"""
+    archetype = request.form.get("archetype", "FOREST")
+    seed = int(request.form.get("seed", 42))
+    population = int(request.form.get("population", 50))
+    strategy = request.form.get("strategy", "smart")
+    GAME_CONFIG.update({"archetype": archetype, "seed": seed,
+                        "population": population, "strategy": strategy})
+    reset_world()
+    return redirect(url_for("quest"))
+
+
+# ============================================================================
+# Dashboard-режим (старый UI с canvas — для тестирования)
+# ============================================================================
+
+@app.route("/dashboard")
+def dashboard():
     state = get_state_dict()
     return render_template("index.html", state=state, config=GAME_CONFIG)
+
+
+@app.route("/")
+def root():
+    """Корень — редирект на квест-режим (Twine-style)"""
+    return redirect(url_for("quest"))
 
 
 @app.route("/next_turn", methods=["POST"])

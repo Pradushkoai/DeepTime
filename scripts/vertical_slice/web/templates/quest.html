@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepTime — Сага племени</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            background: #0a0a0a;
+            color: #d4c5a0;
+            line-height: 1.8;
+            min-height: 100vh;
+            background-image:
+                radial-gradient(ellipse at top, rgba(80, 40, 20, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at bottom, rgba(40, 20, 10, 0.2) 0%, transparent 60%);
+        }
+        .parchment {
+            max-width: 750px;
+            margin: 30px auto;
+            padding: 40px 50px;
+            background: linear-gradient(180deg, #1a1410 0%, #0f0c08 100%);
+            border: 1px solid #3a2a1a;
+            border-radius: 4px;
+            box-shadow:
+                0 0 50px rgba(0,0,0,0.8),
+                inset 0 0 80px rgba(80, 40, 20, 0.1);
+            position: relative;
+        }
+        .parchment::before, .parchment::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #5a3a1a 20%, #5a3a1a 80%, transparent);
+        }
+        .parchment::before { top: 20px; }
+        .parchment::after { bottom: 20px; }
+
+        h1 {
+            text-align: center;
+            color: #c9a55c;
+            font-size: 24px;
+            font-weight: normal;
+            letter-spacing: 4px;
+            margin-bottom: 5px;
+            font-variant: small-caps;
+        }
+        .header-line {
+            text-align: center;
+            color: #6a5a3a;
+            font-size: 13px;
+            font-style: italic;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #2a1f10;
+            padding-bottom: 15px;
+        }
+
+        .season-marker {
+            text-align: center;
+            font-size: 16px;
+            color: #c9a55c;
+            margin: 20px 0 25px;
+            font-variant: small-caps;
+            letter-spacing: 2px;
+        }
+        .season-marker .year { color: #8a7a5a; font-size: 14px; }
+
+        .narrative {
+            font-size: 16px;
+            color: #d4c5a0;
+            margin: 20px 0;
+            text-indent: 30px;
+        }
+        .narrative:first-of-type { text-indent: 0; }
+        .narrative em { color: #c9a55c; font-style: italic; }
+        .narrative .danger { color: #c45a3a; }
+        .narrative .good { color: #6a9a5a; }
+
+        .context {
+            background: rgba(60, 40, 20, 0.15);
+            border-left: 3px solid #5a3a1a;
+            padding: 12px 18px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #9a8a6a;
+            font-style: italic;
+        }
+
+        .event-box {
+            margin: 30px 0;
+            padding: 25px 20px;
+            background: rgba(40, 25, 15, 0.5);
+            border: 1px solid #4a3a2a;
+            border-radius: 2px;
+        }
+        .event-box.critical {
+            border-color: #8a3a2a;
+            background: rgba(60, 20, 10, 0.3);
+        }
+        .event-title {
+            font-size: 18px;
+            color: #c9a55c;
+            margin-bottom: 12px;
+            font-variant: small-caps;
+            letter-spacing: 1px;
+        }
+        .event-box.critical .event-title { color: #c45a3a; }
+        .event-text {
+            font-size: 15px;
+            color: #d4c5a0;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .choices { margin-top: 20px; }
+        .choice {
+            display: block;
+            margin: 12px 0;
+            padding: 14px 18px;
+            background: rgba(30, 22, 14, 0.8);
+            border: 1px solid #4a3a2a;
+            border-radius: 2px;
+            color: #d4c5a0;
+            text-decoration: none;
+            font-family: Georgia, serif;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            width: 100%;
+        }
+        .choice:hover {
+            background: rgba(60, 45, 25, 0.8);
+            border-color: #c9a55c;
+            transform: translateX(5px);
+        }
+        .choice .choice-label {
+            color: #c9a55c;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .choice .choice-desc {
+            font-size: 13px;
+            color: #8a7a5a;
+            font-style: italic;
+        }
+
+        .continue-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 40px;
+            background: rgba(60, 45, 25, 0.3);
+            border: 1px solid #c9a55c;
+            border-radius: 2px;
+            color: #c9a55c;
+            font-family: Georgia, serif;
+            font-size: 16px;
+            cursor: pointer;
+            letter-spacing: 2px;
+            font-variant: small-caps;
+            transition: all 0.3s;
+        }
+        .continue-btn:hover {
+            background: rgba(100, 75, 40, 0.4);
+            color: #e4c57c;
+        }
+
+        .chronicle {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid #2a1f10;
+        }
+        .chronicle-title {
+            text-align: center;
+            color: #6a5a3a;
+            font-size: 13px;
+            font-variant: small-caps;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+        }
+        .chronicle-entry {
+            font-size: 13px;
+            color: #7a6a4a;
+            margin: 6px 0;
+            padding-left: 20px;
+            border-left: 1px solid #2a1f10;
+            font-style: italic;
+        }
+        .chronicle-entry .ch-year { color: #c9a55c; font-style: normal; }
+
+        .config-mini {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #2a1f10;
+            font-size: 12px;
+            color: #5a4a2a;
+        }
+        .config-mini form { display: inline; }
+        .config-mini select, .config-mini input {
+            background: #1a1410;
+            color: #9a8a6a;
+            border: 1px solid #3a2a1a;
+            padding: 2px 6px;
+            font-family: Georgia, serif;
+            font-size: 12px;
+        }
+        .config-mini button {
+            background: transparent;
+            border: 1px solid #5a3a1a;
+            color: #8a7a5a;
+            padding: 3px 10px;
+            font-family: Georgia, serif;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .game-over {
+            text-align: center;
+            padding: 40px;
+        }
+        .game-over h2 {
+            color: #c45a3a;
+            font-size: 32px;
+            font-variant: small-caps;
+            letter-spacing: 5px;
+            margin-bottom: 15px;
+        }
+        .game-over p { color: #8a7a5a; font-style: italic; }
+    </style>
+</head>
+<body>
+<div class="parchment">
+    <h1>Сага племени</h1>
+    <div class="header-line">DeepTime · Хроника стойбища у Реки</div>
+
+    {% if state.game_over %}
+    <div class="game-over">
+        <h2>Племя погибло</h2>
+        <p>Зим пережито: {{ state.winters_survived }}<br>
+           Год: {{ state.year }} до н.э.<br>
+           Так закончилась их история.</p>
+        <form method="post" action="/quest/reset">
+            <input type="hidden" name="archetype" value="{{ config.archetype }}">
+            <input type="hidden" name="seed" value="{{ config.seed }}">
+            <input type="hidden" name="population" value="{{ config.population }}">
+            <input type="hidden" name="strategy" value="{{ config.strategy }}">
+            <button type="submit" class="continue-btn">Начать заново</button>
+        </form>
+    </div>
+    {% else %}
+
+    <div class="season-marker">
+        {{ state.season }} · <span class="year">{{ state.year }} до н.э.</span>
+    </div>
+
+    <p class="narrative">{{ state.season_narrative }}</p>
+
+    <p class="narrative">
+        В стойбище <em>{{ state.alive }} душ</em>: взрослые, дети, старики.
+        {% if state.hungry > 0 %}
+        <span class="danger">{{ state.hungry }} из них голодают</span> — животы подводит, силы уходят.
+        {% else %}
+        Все сыты, дети играют у костра.
+        {% endif %}
+    </p>
+
+    <p class="narrative">
+        {{ state.food_status }}
+        {% if state.season == 'WINTER' %}
+        Зимой еду не добыть — племя живёт тем, что припасли осенью.
+        {% endif %}
+    </p>
+
+    <div class="context">
+        Запасы: 🥩 {{ state.meat }} · 🍓 {{ state.berries }} · 🐟 {{ state.fish }}
+    </div>
+
+    <p class="narrative">
+        {{ state.chief_status }}
+    </p>
+
+    <p class="narrative">
+        В племени — {{ state.factions_text }}.
+    </p>
+
+    {% if state.current_event %}
+
+    <div class="event-box {{ 'critical' if state.current_event.priority == 'CRITICAL' else '' }}">
+        <div class="event-title">{{ state.current_event.title }}</div>
+        <div class="event-text">{{ state.current_event.text }}</div>
+        <div class="choices">
+            {% for choice in state.current_event.choices %}
+            <form method="post" action="/quest/resolve/{{ state.current_event.id }}/{{ loop.index0 }}">
+                <button type="submit" class="choice">
+                    <span class="choice-label">{{ choice.label }}</span>
+                    <span class="choice-desc">{{ choice.description }}</span>
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% else %}
+
+    <form method="post" action="/quest/next">
+        <button type="submit" class="continue-btn">Продолжить →</button>
+    </form>
+
+    {% endif %}
+
+    {% if state.chronicle %}
+    <div class="chronicle">
+        <div class="chronicle-title">Так помнят ваше племя</div>
+        {% for entry in state.chronicle %}
+        <div class="chronicle-entry">
+            <span class="ch-year">{{ entry.year }} {{ entry.season }}</span> — {{ entry.entry }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if state.recent_decisions %}
+    <div class="chronicle">
+        <div class="chronicle-title">Последние решения вождя</div>
+        {% for ev in state.recent_decisions %}
+        <div class="chronicle-entry">
+            <span class="ch-year">{{ ev.season }} {{ ev.year }}</span> — {{ ev.title }}: выбрал «{{ ev.choice }}»
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="config-mini">
+        <form method="post" action="/quest/reset">
+            Архетип:
+            <select name="archetype">
+                {% for a in ['FOREST', 'STEPPE', 'RIVER_VALLEY', 'COASTAL', 'MOUNTAIN', 'DESERT', 'TROPICAL', 'ARCTIC'] %}
+                <option value="{{ a }}" {% if config.archetype == a %}selected{% endif %}>{{ a }}</option>
+                {% endfor %}
+            </select>
+            · Seed: <input type="number" name="seed" value="{{ config.seed }}" style="width:50px;">
+            · Стратегия:
+            <select name="strategy">
+                {% for s in ['auto', 'random', 'smart'] %}
+                <option value="{{ s }}" {% if config.strategy == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Новая сага</button>
+        </form>
+    </div>
+
+    {% endif %}
+</div>
+</body>
+</html>
