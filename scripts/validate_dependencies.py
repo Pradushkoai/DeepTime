@@ -17,7 +17,7 @@ import json
 from pathlib import Path
 from collections import defaultdict
 
-REPO_ROOT = Path("/home/z/my-project/work/deep_time")
+REPO_ROOT = Path("/home/z/my-project/DeepTime")
 
 # Directories to scan
 CATALOG_DIRS = [
