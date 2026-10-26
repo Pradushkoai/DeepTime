@@ -123,6 +123,27 @@ canvas#canvas3d{position:fixed;top:0;left:0;z-index:0;}
 
 <canvas id="canvas3d"></canvas>
 
+<!-- Global map (2D canvas) -->
+<div id="globalMapDiv" style="display:none;position:fixed;top:0;left:0;z-index:5;">
+  <canvas id="globalMapCanvas"></canvas>
+</div>
+
+<!-- Local map (2D canvas) -->
+<div id="localMapDiv" style="display:none;position:fixed;top:0;left:0;z-index:5;">
+  <canvas id="localMapCanvas"></canvas>
+</div>
+
+<!-- Global map controls (top bar for map view) -->
+<div class="overlay" id="globalControls" style="display:none;top:0;left:0;right:0;padding:8px 12px;
+  display:none;align-items:center;gap:8px;background:rgba(13,17,23,0.92);z-index:15;">
+  <button class="sm" style="background:#f5a623;color:#0d1117;border:none;padding:6px 12px;border-radius:5px;
+    cursor:pointer;font-weight:bold;font-size:12px;" onclick="switchView('local')">📍 Локальная карта</button>
+  <button class="sm" style="background:#238636;color:#fff;border:none;padding:6px 12px;border-radius:5px;
+    cursor:pointer;font-weight:bold;font-size:12px;" onclick="switchView('settlement')">🏠 3D Поселение</button>
+  <button class="sm" style="background:#da3633;color:#fff;border:none;padding:6px 12px;border-radius:5px;
+    cursor:pointer;font-weight:bold;font-size:12px;" onclick="switchView('global')">🌍 Глобальная карта</button>
+</div>
+
 <!-- Season progress bar -->
 <div class="seasonProgress"><div class="fill" id="seasonBar" style="width:0%"></div></div>
 
@@ -132,6 +153,7 @@ canvas#canvas3d{position:fixed;top:0;left:0;z-index:0;}
   <button class="sm sec" id="btn1x" onclick="setSpeed(1)">1×</button>
   <button class="sm sec" id="btn2x" onclick="setSpeed(2)">2×</button>
   <button class="sm sec" id="btn3x" onclick="setSpeed(3)">3×</button>
+  <button class="sm" style="background:#569cd6;color:#fff;" onclick="switchView('global')">🌍 Карта</button>
   <div class="seasonInfo">
     <span id="seasonLabel">☀️ ЛЕТО</span>
     <span id="yearLabel">-10000</span>
@@ -227,8 +249,12 @@ canvas#canvas3d{position:fixed;top:0;left:0;z-index:0;}
 <!-- Game -->
 <script src="sim.js"></script>
 <script src="render.js"></script>
+<script src="global_map.js"></script>
 <script src="ui.js"></script>
 
-<script>start();</script>
+<script>
+start();
+initMapCanvases();
+</script>
 </body>
 </html>
