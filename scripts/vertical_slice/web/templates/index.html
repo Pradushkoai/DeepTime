@@ -8,429 +8,661 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #1a1a2e;
+            background: #0d1117;
             color: #e0e0e0;
-            padding: 20px;
+            padding: 15px;
             line-height: 1.5;
         }
-        h1 { color: #f5a623; margin-bottom: 10px; }
-        h2 { color: #4ec9b0; margin: 15px 0 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        h1 { color: #f5a623; margin-bottom: 5px; font-size: 22px; }
+        .subtitle { color: #888; font-size: 13px; margin-bottom: 15px; }
         .container { max-width: 1400px; margin: 0 auto; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 15px; }
-        .panel {
-            background: #16213e;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 15px;
-        }
-        .panel-header {
-            font-size: 13px;
-            color: #888;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-        .stat {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            border-bottom: 1px solid #2a2a4a;
-        }
-        .stat:last-child { border-bottom: none; }
-        .stat .label { color: #aaa; }
-        .stat .value { color: #f5a623; font-weight: bold; }
-        .stat .value.good { color: #4ec9b0; }
-        .stat .value.warn { color: #f5a623; }
-        .stat .value.bad { color: #f04848; }
 
-        .controls {
-            background: #16213e;
-            border: 1px solid #333;
+        /* Top bar with controls */
+        .top-bar {
+            background: #161b22;
+            border: 1px solid #30363d;
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-        .controls form { display: inline-block; margin-right: 10px; }
-        button {
+        .top-bar button {
             background: #f5a623;
-            color: #1a1a2e;
+            color: #0d1117;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 8px 16px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 14px;
-            transition: background 0.2s;
+            font-size: 13px;
+            transition: all 0.2s;
         }
-        button:hover { background: #ffb84d; }
-        button.secondary { background: #4ec9b0; }
-        button.secondary:hover { background: #6ed9c0; }
-        button.danger { background: #f04848; }
-        button.danger:hover { background: #ff6868; }
-        button.small { padding: 5px 10px; font-size: 12px; }
+        .top-bar button:hover { background: #ffb84d; transform: translateY(-1px); }
+        .top-bar button.secondary { background: #238636; color: #fff; }
+        .top-bar button.secondary:hover { background: #2ea043; }
+        .top-bar button.danger { background: #da3633; color: #fff; }
+        .top-bar .spacer { flex: 1; }
+        .top-bar .config-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+        .top-bar select, .top-bar input[type="number"] {
+            background: #0d1117;
+            color: #e0e0e0;
+            border: 1px solid #30363d;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
 
-        .event {
-            background: #1e2a4a;
-            border: 2px solid #f5a623;
+        /* Canvas section */
+        .canvas-section {
+            background: #161b22;
+            border: 1px solid #30363d;
             border-radius: 8px;
-            padding: 15px;
+            padding: 0;
             margin-bottom: 15px;
+            overflow: hidden;
+            position: relative;
         }
-        .event.critical { border-color: #f04848; background: #2a1a1a; }
-        .event.high { border-color: #f5a623; }
-        .event.normal { border-color: #4ec9b0; }
-        .event.low { border-color: #555; }
-        .event h3 { color: #f5a623; margin-bottom: 8px; }
-        .event.critical h3 { color: #f04848; }
-        .event .priority {
+        canvas#settlement {
+            display: block;
+            width: 100%;
+            height: 300px;
+        }
+        .canvas-overlay {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 0 0 8px #000;
+        }
+        .canvas-overlay .season { font-size: 18px; }
+        .canvas-overlay .year { color: #f5a623; }
+        .canvas-legend {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            display: flex;
+            gap: 12px;
             font-size: 11px;
-            color: #888;
+            background: rgba(13,17,23,0.8);
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+        .legend-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+
+        /* Main grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 15px;
+        }
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .panel-title {
+            font-size: 12px;
+            color: #8b949e;
             text-transform: uppercase;
             letter-spacing: 1px;
-        }
-        .event .text { margin: 10px 0; color: #ddd; }
-        .event .choices { margin-top: 10px; }
-        .event .choice {
-            background: #16213e;
-            border: 1px solid #444;
-            border-radius: 5px;
-            padding: 10px;
             margin-bottom: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .event .choice:hover { background: #1e2a4a; }
-        .event .choice .label { font-weight: bold; color: #4ec9b0; }
-        .event .choice .desc { font-size: 12px; color: #aaa; margin-top: 3px; }
-
-        .chronicle {
-            background: #16213e;
-            border-radius: 5px;
-            padding: 8px;
-            max-height: 250px;
-            overflow-y: auto;
-            font-size: 13px;
-            font-family: 'Courier New', monospace;
-        }
-        .chronicle-entry {
-            padding: 3px 0;
-            border-bottom: 1px solid #2a2a4a;
-            color: #aaa;
-        }
-        .chronicle-entry .year { color: #f5a623; }
-
-        .factions .faction {
-            background: #1e2a4a;
-            padding: 8px;
-            border-radius: 5px;
-            margin-bottom: 8px;
-        }
-        .faction .name { font-weight: bold; color: #4ec9b0; }
-        .faction .grievance-bar {
-            height: 8px;
-            background: #333;
-            border-radius: 4px;
-            margin-top: 5px;
-            overflow: hidden;
-        }
-        .faction .grievance-fill {
-            height: 100%;
-            background: #f04848;
-            transition: width 0.3s;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 5px;
         }
 
-        .actions-bar {
+        /* Stats */
+        .stat-row {
             display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-        .action-tag {
-            background: #2a4a2a;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-            color: #4ec9b0;
-        }
-
-        .game-over {
-            background: #2a1a1a;
-            border: 3px solid #f04848;
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            font-size: 24px;
-            color: #f04848;
-            margin: 20px 0;
-        }
-
-        .config-form input, .config-form select {
-            background: #1a1a2e;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            padding: 5px;
-            border-radius: 3px;
+            justify-content: space-between;
+            padding: 4px 0;
             font-size: 13px;
         }
-        .config-form label {
-            font-size: 13px;
-            color: #aaa;
-            margin-right: 5px;
-        }
-        .config-form { margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; }
+        .stat-row .label { color: #8b949e; }
+        .stat-row .value { font-weight: bold; }
+        .value.good { color: #3fb950; }
+        .value.warn { color: #d29922; }
+        .value.bad { color: #f85149; }
 
-        .pressure-bar {
-            height: 12px;
-            background: #333;
-            border-radius: 6px;
+        /* Pressure bar */
+        .bar-container {
+            height: 10px;
+            background: #21262d;
+            border-radius: 5px;
             overflow: hidden;
-            margin-top: 5px;
+            margin-top: 4px;
         }
-        .pressure-fill {
+        .bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #4ec9b0 0%, #f5a623 60%, #f04848 100%);
+            border-radius: 5px;
             transition: width 0.3s;
         }
+        .bar-fill.pressure {
+            background: linear-gradient(90deg, #3fb950 0%, #d29922 60%, #f85149 100%);
+        }
+        .bar-fill.grievance {
+            background: linear-gradient(90deg, #3fb950 0%, #d29922 60%, #f85149 100%);
+        }
 
-        .resources {
+        /* Resources */
+        .resources-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 5px;
+            gap: 6px;
         }
-        .resource {
-            background: #1e2a4a;
-            padding: 5px 8px;
-            border-radius: 3px;
+        .resource-card {
+            background: #21262d;
+            padding: 6px 10px;
+            border-radius: 6px;
             font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .resource .icon { margin-right: 5px; }
+        .resource-card .icon { font-size: 16px; }
+        .resource-card .num { font-weight: bold; color: #f5a623; }
+
+        /* Events */
+        .event-card {
+            background: #1c2128;
+            border: 2px solid;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .event-card.critical { border-color: #f85149; background: #2a1a1a; }
+        .event-card.high { border-color: #f5a623; }
+        .event-card.normal { border-color: #3fb950; }
+        .event-card.low { border-color: #484f58; }
+        .event-card .ev-priority {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8b949e;
+        }
+        .event-card h3 { font-size: 15px; margin: 5px 0; color: #f5a623; }
+        .event-card.critical h3 { color: #f85149; }
+        .event-card .ev-text { font-size: 13px; color: #c9d1d9; margin: 8px 0; }
+        .choice-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #e0e0e0;
+        }
+        .choice-btn:hover { background: #30363d; border-color: #f5a623; }
+        .choice-btn .choice-label { font-weight: bold; color: #3fb950; font-size: 13px; }
+        .choice-btn .choice-desc { font-size: 11px; color: #8b949e; margin-top: 2px; }
+
+        /* Log */
+        .log-box {
+            background: #0d1117;
+            border-radius: 6px;
+            padding: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid #161b22;
+            color: #8b949e;
+        }
+        .log-entry .log-year { color: #f5a623; }
+        .log-entry .log-choice { color: #3fb950; }
+
+        /* Faction */
+        .faction-card {
+            background: #1c2128;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 6px;
+        }
+        .faction-card .fac-name { font-weight: bold; font-size: 13px; }
+        .faction-card .fac-info { font-size: 11px; color: #8b949e; margin: 2px 0; }
+
+        /* Action tags */
+        .action-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .action-tag {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        /* Game over */
+        .game-over {
+            background: #2a1a1a;
+            border: 3px solid #f85149;
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .game-over h2 { color: #f85149; font-size: 28px; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🏛️ DeepTime — Vertical Slice Prototype</h1>
+    <h1>🏛️ DeepTime — Vertical Slice</h1>
+    <div class="subtitle">Симулятор развития цивилизации на реальной Земле · Прототип</div>
 
     {% if state.game_over %}
     <div class="game-over">
-        💀 Племя погибло<br>
-        <small>Ходов сыграно: {{ state.turn }} | Зим пережито: {{ state.metrics.winters_survived }}</small>
+        <h2>💀 Племя погибло</h2>
+        <p>Ходов сыграно: {{ state.turn }} | Зим пережито: {{ state.metrics.winters_survived }}</p>
     </div>
     {% endif %}
 
-    <div class="controls">
+    <!-- Top controls -->
+    <div class="top-bar">
         <form method="post" action="/next_turn" style="display:inline;">
-            <button type="submit">▶ Следующий ход</button>
+            <button type="submit">▶ Ход</button>
         </form>
-        <form method="post" action="/auto_play/10" style="display:inline;">
-            <button type="submit" class="secondary">⏩ 10 ходов</button>
+        <form method="post" action="/auto_play/5" style="display:inline;">
+            <button type="submit" class="secondary">⏩ 5</button>
         </form>
-        <form method="post" action="/auto_play/50" style="display:inline;">
-            <button type="submit" class="secondary">⏩ 50 ходов</button>
+        <form method="post" action="/auto_play/20" style="display:inline;">
+            <button type="submit" class="secondary">⏩ 20</button>
         </form>
         {% if state.pending_events %}
         <form method="post" action="/auto_resolve_all" style="display:inline;">
-            <button type="submit" class="secondary">⚡ Разрешить все события (smart)</button>
+            <button type="submit" class="secondary">⚡ Разрешить все</button>
         </form>
         {% endif %}
-        <form method="post" action="/reset" class="config-form" style="display:inline-block; margin-left: 20px;">
-            <label>Архетип:
-                <select name="archetype">
-                    {% for a in ['FOREST', 'STEPPE', 'RIVER_VALLEY', 'COASTAL', 'MOUNTAIN', 'DESERT', 'TROPICAL', 'ARCTIC'] %}
-                    <option value="{{ a }}" {% if config.archetype == a %}selected{% endif %}>{{ a }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <label>Seed: <input type="number" name="seed" value="{{ config.seed }}" style="width: 60px;"></label>
-            <label>Pop: <input type="number" name="population" value="{{ config.population }}" style="width: 60px;"></label>
-            <label>Стратегия:
-                <select name="strategy">
-                    {% for s in ['auto', 'random', 'smart'] %}
-                    <option value="{{ s }}" {% if config.strategy == s %}selected{% endif %}>{{ s }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <button type="submit" class="danger small">🔄 Новая игра</button>
+        <div class="spacer"></div>
+        <form method="post" action="/reset" class="config-group">
+            <select name="archetype">
+                {% for a in ['FOREST', 'STEPPE', 'RIVER_VALLEY', 'COASTAL', 'MOUNTAIN', 'DESERT', 'TROPICAL', 'ARCTIC'] %}
+                <option value="{{ a }}" {% if config.archetype == a %}selected{% endif %}>{{ a }}</option>
+                {% endfor %}
+            </select>
+            <input type="number" name="seed" value="{{ config.seed }}" style="width:55px;" title="Seed">
+            <input type="number" name="population" value="{{ config.population }}" style="width:55px;" title="Population">
+            <select name="strategy">
+                {% for s in ['auto', 'random', 'smart'] %}
+                <option value="{{ s }}" {% if config.strategy == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="danger">🔄 Новая игра</button>
         </form>
     </div>
 
+    <!-- Canvas: settlement visualization -->
+    <div class="canvas-section">
+        <canvas id="settlement" width="1400" height="300"></canvas>
+        <div class="canvas-overlay">
+            <span class="season">{{ state.season }}</span>
+            <span class="year">{{ state.year }} до н.э.</span>
+            <span style="color:#3fb950;">👥 {{ state.alive }}</span>
+            {% if state.hungry > 0 %}
+            <span style="color:#f85149;">🍗 голод: {{ state.hungry }}</span>
+            {% endif %}
+        </div>
+        <div class="canvas-legend">
+            <span><span class="legend-dot" style="background:#f04848;"></span>Охота</span>
+            <span><span class="legend-dot" style="background:#4ec9b0;"></span>Собирательство</span>
+            <span><span class="legend-dot" style="background:#569cd6;"></span>Рыбалка</span>
+            <span><span class="legend-dot" style="background:#dcdcaa;"></span>Стройка</span>
+            <span><span class="legend-dot" style="background:#c586c0;"></span>Ритуал</span>
+            <span><span class="legend-dot" style="background:#888;"></span>Отдых</span>
+        </div>
+    </div>
+
+    <!-- Main 3-column grid -->
     <div class="grid">
-        <!-- Левая колонка: состояние -->
+        <!-- LEFT: Stats -->
         <div>
             <div class="panel">
-                <div class="panel-header">📊 Состояние племени</div>
-                <div class="stat">
-                    <span class="label">Ход / Год</span>
-                    <span class="value">{{ state.turn }} / {{ state.year }} до н.э.</span>
-                </div>
-                <div class="stat">
-                    <span class="label">Сезон</span>
-                    <span class="value">{{ state.season }}</span>
-                </div>
-                <div class="stat">
-                    <span class="label">Архетип</span>
-                    <span class="value">{{ state.archetype }}</span>
-                </div>
-                <div class="stat">
-                    <span class="label">Население</span>
-                    <span class="value {% if state.alive < 10 %}bad{% elif state.alive < 30 %}warn{% else %}good{% endif %}">
-                        {{ state.alive }} (взр: {{ state.adults }}, дет: {{ state.children }}, старики: {{ state.elders }})
-                    </span>
-                </div>
-                <div class="stat">
-                    <span class="label">Голодает</span>
-                    <span class="value {% if state.hungry > 20 %}bad{% elif state.hungry > 5 %}warn{% else %}good{% endif %}">
-                        {{ state.hungry }}
-                    </span>
-                </div>
-            </div>
-
-            <div class="panel" style="margin-top: 15px;">
-                <div class="panel-header">👑 Вождь</div>
-                <div class="stat">
+                <div class="panel-title">👑 Вождь</div>
+                <div class="stat-row">
                     <span class="label">Имя</span>
                     <span class="value">{{ state.chief.name }}</span>
                 </div>
-                <div class="stat">
+                <div class="stat-row">
                     <span class="label">Возраст / Эра</span>
                     <span class="value">{{ state.chief.age }} / {{ state.chief.era }}</span>
                 </div>
-                <div class="stat">
+                <div class="stat-row">
                     <span class="label">Легитимность</span>
                     <span class="value">{{ state.chief.legitimacy }}/100</span>
                 </div>
-                <div class="stat">
+                <div class="stat-row">
                     <span class="label">Давление</span>
                     <span class="value {% if state.chief.pressure > 80 %}bad{% elif state.chief.pressure > 50 %}warn{% else %}good{% endif %}">
                         {{ state.chief.pressure }}/100
                     </span>
                 </div>
-                <div class="pressure-bar">
-                    <div class="pressure-fill" style="width: {{ state.chief.pressure }}%;"></div>
+                <div class="bar-container">
+                    <div class="bar-fill pressure" style="width: {{ state.chief.pressure }}%;"></div>
                 </div>
-                <div class="stat" style="margin-top: 8px;">
+                <div class="stat-row" style="margin-top: 6px;">
                     <span class="label">Реформ проведено</span>
-                    <span class="value">{{ state.chief.reforms }}</span>
+                    <span class="value good">{{ state.chief.reforms }}</span>
                 </div>
             </div>
 
-            <div class="panel" style="margin-top: 15px;">
-                <div class="panel-header">📦 Запасы</div>
-                <div class="resources">
-                    <div class="resource">🥩 Мясо: <b>{{ state.settlement.meat }}</b></div>
-                    <div class="resource">🍓 Ягоды: <b>{{ state.settlement.berries }}</b></div>
-                    <div class="resource">🐟 Рыба: <b>{{ state.settlement.fish }}</b></div>
-                    <div class="resource">🪵 Дерево: <b>{{ state.settlement.wood }}</b></div>
+            <div class="panel" style="margin-top: 10px;">
+                <div class="panel-title">📦 Запасы</div>
+                <div class="resources-grid">
+                    <div class="resource-card"><span class="icon">🥩</span> Мясо <span class="num">{{ state.settlement.meat }}</span></div>
+                    <div class="resource-card"><span class="icon">🍓</span> Ягоды <span class="num">{{ state.settlement.berries }}</span></div>
+                    <div class="resource-card"><span class="icon">🐟</span> Рыба <span class="num">{{ state.settlement.fish }}</span></div>
+                    <div class="resource-card"><span class="icon">🪵</span> Дерево <span class="num">{{ state.settlement.wood }}</span></div>
                 </div>
             </div>
 
-            <div class="panel" style="margin-top: 15px;">
-                <div class="panel-header">👥 Действия граждан</div>
-                <div class="actions-bar">
+            <div class="panel" style="margin-top: 10px;">
+                <div class="panel-title">👥 Действия ({{ state.alive }} чел.)</div>
+                <div class="action-tags">
+                    {% set colors = {'HUNT':'#f04848','GATHER':'#4ec9b0','FISH':'#569cd6','BUILD':'#dcdcaa','REST':'#888','RITUAL':'#c586c0','IDLE':'#666'} %}
                     {% for action, count in state.action_counts.items() %}
-                    <span class="action-tag">{{ action }}: {{ count }}</span>
+                    <span class="action-tag" style="background: {{ colors.get(action, '#444') }}22; color: {{ colors.get(action, '#aaa') }}; border: 1px solid {{ colors.get(action, '#555') }};">
+                        {{ action }}: {{ count }}
+                    </span>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- Средняя колонка: события -->
+        <!-- CENTER: Events -->
         <div>
-            <div class="panel-header">⚡ События ({{ state.pending_events|length }} ожидают)</div>
+            <div class="panel-title">⚡ События ({{ state.pending_events|length }} ожидают)</div>
             {% if state.pending_events %}
                 {% for ev in state.pending_events %}
-                <div class="event {{ ev.priority|lower }}">
-                    <div class="priority">{{ ev.priority }} · {{ ev.type }}</div>
+                <div class="event-card {{ ev.priority|lower }}">
+                    <div class="ev-priority">{{ ev.priority }} · {{ ev.type }}</div>
                     <h3>{{ ev.title }}</h3>
-                    <div class="text">{{ ev.text }}</div>
-                    <div class="choices">
-                        {% for choice in ev.choices %}
-                        <form method="post" action="/resolve_event/{{ ev.id }}/{{ loop.index0 }}">
-                            <button type="submit" class="choice" style="text-align: left; width: 100%; background: #16213e; color: inherit; padding: 10px;">
-                                <div class="label">{{ choice.label }}</div>
-                                <div class="desc">{{ choice.description }}</div>
-                            </button>
-                        </form>
-                        {% endfor %}
-                    </div>
+                    <div class="ev-text">{{ ev.text }}</div>
+                    {% for choice in ev.choices %}
+                    <form method="post" action="/resolve_event/{{ ev.id }}/{{ loop.index0 }}">
+                        <button type="submit" class="choice-btn">
+                            <div class="choice-label">{{ choice.label }}</div>
+                            <div class="choice-desc">{{ choice.description }}</div>
+                        </button>
+                    </form>
+                    {% endfor %}
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="event low">
-                    <div class="text" style="text-align: center; color: #888;">
-                        Нет ожидающих событий.<br>
-                        Нажмите «Следующий ход» для продолжения.
+                <div class="event-card low">
+                    <div class="ev-text" style="text-align:center; color:#666;">
+                        Нет ожидающих событий.<br>Нажми «▶ Ход» для продолжения.
                     </div>
                 </div>
             {% endif %}
 
-            <div class="panel" style="margin-top: 15px;">
-                <div class="panel-header">📜 Решённые события (последние 10)</div>
-                <div class="chronicle">
+            <div class="panel" style="margin-top: 10px;">
+                <div class="panel-title">📜 История (последние 10)</div>
+                <div class="log-box">
                     {% for ev in state.resolved_events %}
-                    <div class="chronicle-entry">
-                        <span class="year">[Ход {{ ev.turn }} {{ ev.season }}]</span>
-                        {{ ev.title }} → <b style="color: #4ec9b0;">{{ ev.choice }}</b>
+                    <div class="log-entry">
+                        <span class="log-year">[{{ ev.turn }}]</span>
+                        {{ ev.title }} → <span class="log-choice">{{ ev.choice }}</span>
                     </div>
                     {% else %}
-                    <div class="chronicle-entry" style="color: #666;">Пока нет решённых событий</div>
+                    <div class="log-entry" style="color:#555;">Пока нет событий</div>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- Правая колонка: фракции + хроника -->
+        <!-- RIGHT: Factions + Chronicle + Metrics -->
         <div>
-            <div class="panel factions">
-                <div class="panel-header">⚔️ Фракции</div>
+            <div class="panel">
+                <div class="panel-title">⚔️ Фракции</div>
                 {% for f in state.factions %}
-                <div class="faction">
-                    <div class="name">{{ f.emoji }} {{ f.name }} (сила {{ f.power }})</div>
-                    <div style="font-size: 12px; color: #888;">
-                        Обида: {{ f.grievance }}/100
-                        {% if f.grievance_reason %} — {{ f.grievance_reason }}{% endif %}
-                    </div>
-                    <div class="grievance-bar">
-                        <div class="grievance-fill" style="width: {{ f.grievance }}%;"></div>
+                <div class="faction-card">
+                    <div class="fac-name">{{ f.emoji }} {{ f.name }} <span style="color:#8b949e; font-size:11px;">(сила {{ f.power }})</span></div>
+                    <div class="fac-info">Обида: {{ f.grievance }}/100{% if f.grievance_reason %} — {{ f.grievance_reason }}{% endif %}</div>
+                    <div class="bar-container">
+                        <div class="bar-fill grievance" style="width: {{ f.grievance }}%;"></div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
 
-            <div class="panel" style="margin-top: 15px;">
-                <div class="panel-header">📜 Хроника (последние 15)</div>
-                <div class="chronicle">
+            <div class="panel" style="margin-top: 10px;">
+                <div class="panel-title">📖 Хроника</div>
+                <div class="log-box">
                     {% for entry in state.chronicle %}
-                    <div class="chronicle-entry">
-                        <span class="year">[{{ entry.year }} {{ entry.season }}]</span>
+                    <div class="log-entry">
+                        <span class="log-year">[{{ entry.year }} {{ entry.season }}]</span>
                         {{ entry.entry }}
                     </div>
                     {% else %}
-                    <div class="chronicle-entry" style="color: #666;">Хроника пуста</div>
+                    <div class="log-entry" style="color:#555;">Хроника пуста</div>
                     {% endfor %}
                 </div>
             </div>
 
-            <div class="panel" style="margin-top: 15px;">
-                <div class="panel-header">📊 Метрики</div>
-                <div class="stat">
-                    <span class="label">Всего событий</span>
-                    <span class="value">{{ state.metrics.total_events }}</span>
-                </div>
-                <div class="stat">
-                    <span class="label">Всего решений</span>
-                    <span class="value">{{ state.metrics.total_decisions }}</span>
-                </div>
-                <div class="stat">
-                    <span class="label">Зим пережито</span>
-                    <span class="value">{{ state.metrics.winters_survived }}</span>
-                </div>
-                <div class="stat">
-                    <span class="label">Макс. давление</span>
-                    <span class="value">{{ state.metrics.max_pressure }}</span>
-                </div>
+            <div class="panel" style="margin-top: 10px;">
+                <div class="panel-title">📊 Метрики</div>
+                <div class="stat-row"><span class="label">Событий</span><span class="value">{{ state.metrics.total_events }}</span></div>
+                <div class="stat-row"><span class="label">Решений</span><span class="value">{{ state.metrics.total_decisions }}</span></div>
+                <div class="stat-row"><span class="label">Зим пережито</span><span class="value">{{ state.metrics.winters_survived }}</span></div>
+                <div class="stat-row"><span class="label">Макс. давление</span><span class="value">{{ state.metrics.max_pressure }}</span></div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+// ===== Settlement Canvas Visualization =====
+const canvas = document.getElementById('settlement');
+const ctx = canvas.getContext('2d');
+
+// Resize canvas to display size
+function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Data from server
+const seasonCode = "{{ state.season_code }}";
+const citizens = {{ state.citizens_vis | tojson | safe if state.citizens_vis else '[]' }};
+const huts = {{ state.huts }};
+const hearth = {{ state.hearth }};
+const archetype = "{{ state.archetype }}";
+const turn = {{ state.turn }};
+
+// Season colors
+const seasonColors = {
+    SPRING: { sky: '#1a3a2a', ground: '#2d5a1f', accent: '#3fb950' },
+    SUMMER: { sky: '#1a3a4a', ground: '#2d5a1f', accent: '#d29922' },
+    AUTUMN: { sky: '#3a2a1a', ground: '#4a3a1f', accent: '#d29922' },
+    WINTER: { sky: '#1a2a3a', ground: '#3a4a5a', accent: '#569cd6' },
+};
+const sc = seasonColors[seasonCode] || seasonColors.SUMMER;
+
+// Simple PRNG for stable positions
+function seededRandom(seed) {
+    let s = seed;
+    return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+}
+const rng = seededRandom(turn * 1000 + 42);
+
+function draw() {
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // Sky gradient
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+    skyGrad.addColorStop(0, sc.sky);
+    skyGrad.addColorStop(0.6, '#0d1117');
+    skyGrad.addColorStop(1, '#0d1117');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Ground
+    ctx.fillStyle = sc.ground;
+    ctx.fillRect(0, h * 0.6, w, h * 0.4);
+
+    // Winter snow overlay
+    if (seasonCode === 'WINTER') {
+        ctx.fillStyle = 'rgba(200, 220, 255, 0.3)';
+        ctx.fillRect(0, h * 0.6, w, h * 0.4);
+    }
+
+    // Draw trees (background)
+    const treeRng = seededRandom(42);
+    for (let i = 0; i < 15; i++) {
+        const tx = treeRng() * w;
+        const ty = h * 0.55 + treeRng() * h * 0.1;
+        const size = 8 + treeRng() * 8;
+        // Trunk
+        ctx.fillStyle = '#3d2b1f';
+        ctx.fillRect(tx - 1, ty, 2, size);
+        // Leaves
+        ctx.fillStyle = seasonCode === 'WINTER' ? '#2a3a2a' : '#1a4a1a';
+        ctx.beginPath();
+        ctx.arc(tx, ty - size * 0.3, size * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Draw river (for RIVER_VALLEY, COASTAL)
+    if (archetype === 'RIVER_VALLEY' || archetype === 'COASTAL') {
+        ctx.strokeStyle = 'rgba(86, 156, 214, 0.4)';
+        ctx.lineWidth = 20;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.7, 0);
+        ctx.bezierCurveTo(w * 0.8, h * 0.3, w * 0.6, h * 0.6, w * 0.9, h);
+        ctx.stroke();
+    }
+
+    // Draw huts
+    const hutPositions = [];
+    for (let i = 0; i < Math.min(huts, 12); i++) {
+        const hx = w * 0.2 + (i % 4) * 60 + rng() * 20;
+        const hy = h * 0.65 + Math.floor(i / 4) * 35 + rng() * 10;
+        hutPositions.push({ x: hx, y: hy });
+
+        // Hut body
+        ctx.fillStyle = '#3d2b1f';
+        ctx.beginPath();
+        ctx.moveTo(hx - 15, hy + 15);
+        ctx.lineTo(hx, hy - 10);
+        ctx.lineTo(hx + 15, hy + 15);
+        ctx.closePath();
+        ctx.fill();
+
+        // Hut door
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(hx - 4, hy + 5, 8, 10);
+
+        // Smoke from hut
+        if (seasonCode !== 'WINTER' && rng() > 0.5) {
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.2)';
+            ctx.beginPath();
+            ctx.arc(hx + rng() * 4 - 2, hy - 15 - rng() * 10, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // Draw central hearth/fire
+    const fireX = w * 0.5;
+    const fireY = h * 0.72;
+    // Fire base
+    ctx.fillStyle = '#3d2b1f';
+    ctx.beginPath();
+    ctx.ellipse(fireX, fireY + 5, 15, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Flames (animated by turn)
+    const flameHeight = 10 + (turn % 5) * 2;
+    const flameGrad = ctx.createRadialGradient(fireX, fireY, 0, fireX, fireY, flameHeight + 5);
+    flameGrad.addColorStop(0, '#ffeb3b');
+    flameGrad.addColorStop(0.5, '#ff9800');
+    flameGrad.addColorStop(1, 'rgba(244, 67, 54, 0)');
+    ctx.fillStyle = flameGrad;
+    ctx.beginPath();
+    ctx.ellipse(fireX, fireY - flameHeight * 0.3, 8, flameHeight, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw citizens
+    for (let i = 0; i < citizens.length; i++) {
+        const c = citizens[i];
+        const cx = c.x * w;
+        const cy = c.y * h * 0.85 + h * 0.1;
+        const r = 4;
+
+        // Glow for hungry citizens
+        if (c.hunger > 60) {
+            ctx.fillStyle = 'rgba(248, 81, 73, 0.2)';
+            ctx.beginPath();
+            ctx.arc(cx, cy, r + 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Citizen dot
+        ctx.fillStyle = c.color;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Outline
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+
+    // Season accent: snowflakes in winter
+    if (seasonCode === 'WINTER') {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        for (let i = 0; i < 30; i++) {
+            const sx = rng() * w;
+            const sy = rng() * h * 0.6;
+            ctx.beginPath();
+            ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // Season accent: sun in summer
+    if (seasonCode === 'SUMMER') {
+        ctx.fillStyle = 'rgba(210, 153, 34, 0.3)';
+        ctx.beginPath();
+        ctx.arc(w * 0.85, h * 0.2, 25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(210, 153, 34, 0.5)';
+        ctx.beginPath();
+        ctx.arc(w * 0.85, h * 0.2, 15, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+draw();
+</script>
 </body>
 </html>

@@ -26,6 +26,15 @@ from vertical_slice_prototype import (
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Ловить все исключения чтобы сервер не падал"""
+    import traceback
+    print(f"[ERROR] {e}")
+    traceback.print_exc()
+    return f"Ошибка сервера: {e}", 500
+
 # Глобальное состояние игры
 WORLD = None
 LAST_TURN_RESULT = None
@@ -70,6 +79,30 @@ def get_state_dict():
         a = c.current_action.name
         action_counts[a] = action_counts.get(a, 0) + 1
 
+    # Граждане для визуализации (canvas) — максимум 50 точек
+    citizens_vis = []
+    import random as _rng
+    _rng2 = _rng.Random(world.seed + world.turn)
+    for c in alive[:50]:
+        action_color = {
+            "HUNT": "#f04848",
+            "GATHER": "#4ec9b0",
+            "FISH": "#569cd6",
+            "BUILD": "#dcdcaa",
+            "REST": "#888",
+            "RITUAL": "#c586c0",
+            "IDLE": "#666",
+        }.get(c.current_action.name, "#aaa")
+        citizens_vis.append({
+            "name": c.name,
+            "age": c.age,
+            "action": c.current_action.name,
+            "color": action_color,
+            "hunger": c.hunger,
+            "x": _rng2.uniform(0.1, 0.9),
+            "y": _rng2.uniform(0.15, 0.85),
+        })
+
     # События ожидающие выбора
     pending = []
     for ev in world.pending_events[:5]:  # топ-5 по приоритету
@@ -107,17 +140,22 @@ def get_state_dict():
         Season.AUTUMN: "🍂 ОСЕНЬ",
         Season.WINTER: "❄️ ЗИМА",
     }[world.season]
+    season_code = world.season.name  # SPRING/SUMMER/AUTUMN/WINTER для canvas
 
     return {
         "turn": world.turn,
         "year": world.year,
         "season": season_emoji,
+        "season_code": season_code,
         "archetype": world.archetype.name,
         "alive": alive_count,
         "hungry": hungry,
         "children": children,
         "adults": adults,
         "elders": elders,
+        "citizens_vis": citizens_vis,
+        "huts": world.settlement.huts,
+        "hearth": world.settlement.hearth,
         "settlement": {
             "name": world.settlement.name,
             "meat": world.settlement.meat,
@@ -258,4 +296,6 @@ if __name__ == "__main__":
           f"pop: {GAME_CONFIG['population']}, стратегия: {GAME_CONFIG['strategy']}")
     print(f"Открой: http://127.0.0.1:5001/")
     print("=" * 60)
-    app.run(host="0.0.0.0", port=5001, debug=False)
+    # threaded=True чтобы сервер не умиал при нескольких запросах
+    # debug=False но с error handler
+    app.run(host="0.0.0.0", port=5001, debug=False, threaded=True)
