@@ -9,6 +9,105 @@
 
 ---
 
+## 2026-10-26 — v0.33: Стадия 3 — Техническая архитектура (T-001..T-008) ⭐⭐⭐
+
+**Тип**: MAJOR (Стадия 3 завершена — 8 технических спецификаций)
+
+**Что произошло**: после внедрения аудита Модели B (v0.28-v0.32) пользователь дал команду: «переходим к стадии 3. Давай, братан - тщательно, неспеша». Создан домен `docs/ai/14_architecture/` с 8 техническими спецификациями.
+
+**8 технических спецификаций**:
+
+### T-001 Архитектура движка (`engine_architecture_design.md`)
+- 4 слоя: Data / Simulation (ECS) / Render / UI
+- Принцип детерминизма (seed + input = одинаковое состояние)
+- ECS-модель: Entity/Component/System
+- Game Loop с связью с D-015 (контракт сессии)
+- 3 уровня рендеринга (близкий/стратегический/глобальный — GDD §19)
+- Главные экраны UI (D-007 + D-016)
+- Структура проекта (Assembly Definitions)
+- Технологический стек: Unity 2022 LTS + DOTS/ECS
+- 7 принципов архитектуры (отделение логики/рендера, ECS, LOD, детерминизм, кэп индивидуальности, «нельзя наказывать за невидимое», прерываемость)
+
+### T-002 Структура данных (ECS) (`data_structures_design.md`)
+- 12 archetypes: Citizen, Family, Settlement, Building, Faction, Chief, Army, Caravan, AICiv, Event, Hex, Civilization
+- 40+ POD-компонентов с C#-структурами
+- 15+ систем по частотам тика
+- Профиль памяти: ~13 МБ на 30 000 граждан + 64 800 гексов
+- Ключевые: ChiefComponent (давление/эра), ActionReason (R7 explainability), FactionGrievance, ArmySupply (дни снабжения вместо HP), HexVisibility (4 состояния), EventEntity, DegradationState, AICivArc (Д2)
+
+### T-003 LOD-симуляция (`lod_simulation_design.md`)
+- 8 частот тика из GDD §7 (1/сек до 1/ход)
+- Связь с D-015 (3 темпа игрока: вождя/поколения/эпохи)
+- Бесшовный переход «личность → абстракция» (N=500, CohortEntity)
+- Профиль нагрузки: ~1 200 ops/сек (подъёмно для одного ядра)
+- Параллелизм ECS (safe vs unsafe systems)
+- Game Loop с учётом LOD
+- Пауза для выбора (D-016)
+- Реализация «ускорения времени» в темпах поколения/эпохи
+
+### T-004 Гекс-сетка + генерация мира (`hex_grid_design.md`)
+- Axial coordinates (q, r), 360×180 = 64 800 гексов
+- 6 направлений соседства, wrap-around по longitude
+- Пайплайн генерации (10 источников: SRTM, OSM, SoilGrids, USGS...)
+- Бинарный формат ~50-200 МБ, грузится за 2-5 сек
+- Локальный зум: 25×25 = 625 ячеек по 2×2 км
+- Процедурная развёртка с сидом из hexId (детерминированная)
+- Связь с туманом войны (D-013: 4 состояния, радиусы)
+- Профиль памяти: ~6 МБ в рантайме
+
+### T-005 Система событий (движок) (`event_engine_design.md`)
+- 3 подсистемы: TriggerGenerator/CalendarGenerator/NarrativeGenerator
+- Каталог ~50 триггеров (вождь/фракции/соседи/вырождение/война/милстоуны/позитивные)
+- Очередь с 5 приоритетами (CRITICAL/HIGH/NORMAL/LOW/BACKGROUND)
+- Лимит очереди: 5 событий на показ
+- Связанные события (nextEventId)
+- Пауза для выбора: 1/ход пауза, 1/сек продолжается, автопауза > 30 сек
+- EventResolver (12+ типов ConsequenceType)
+- EventBus (уведомление UI)
+- Локализация JSON с подстановками
+
+### T-006 Save/Load (`save_load_design.md`)
+- 3 уровня: Input Log (1 КБ/ход) / Snapshot (~13 МБ) / Full Save (~14 МБ)
+- Гибрид SQLite + BSON, gzip → ~5 МБ на сейв
+- Версионирование схем (миграции)
+- Replay (детерминированный playback)
+- Мультиплеер Q-018 (lockstep, архитектура готовится)
+- Автосейв каждые 10 ходов + при выходе
+- Восстановление после краша
+
+### T-007 Производительность (`performance_design.md`)
+- Целевые метрики: 60 FPS, < 4 ГБ RAM, < 5 сек load
+- Профиль нагрузки: ~10 ms/сек симуляция (0.6% CPU на 60 FPS)
+- 6 узких мест идентифицированы (CitizenActionSystem, VisibilitySystem, Save/Load, рендер, pathfinding, EventSystem)
+- Решения для каждого
+- 4 бенчмарка: 50 / 5 000 / 30 000 / 100 000 граждан
+- Оптимизации: ECS (Burst/Jobs), рендер (Instancing/LOD/HLOD), memory (pooling/arena)
+
+### T-008 Vertical Slice (`vertical_slice_design.md`)
+- GDD Фаза 1: 1 регион, ~50 граждан, 5 ресурсов, 3 технологии, 1 угроза
+- 2-3 месяца работы, 12 недель план
+- Что входит (must-have) / не входит (out-of-scope)
+- Архитектурные упрощения
+- Метрики успеха: ≥5 решений/час, ≤30% дроп-офф, ≥70% «хочу ещё»
+- Связь с D-001..D-017 (что в срезе, что отложено)
+- План «что после среза» (Fun/не Fun)
+
+**Обновлённые файлы**:
+- `docs/ai/14_architecture/README.md` — обзор Стадии 3
+- `docs/ai/14_architecture/engine_architecture_design.md` — T-001
+- `docs/ai/14_architecture/data_structures_design.md` — T-002
+- `docs/ai/14_architecture/lod_simulation_design.md` — T-003
+- `docs/ai/14_architecture/hex_grid_design.md` — T-004
+- `docs/ai/14_architecture/event_engine_design.md` — T-005
+- `docs/ai/14_architecture/save_load_design.md` — T-006
+- `docs/ai/14_architecture/performance_design.md` — T-007
+- `docs/ai/14_architecture/vertical_slice_design.md` — T-008
+
+### Стадия
+v0.33 завершён. 8 технических спецификаций Стадии 3 готовы (T-001..T-008). Архитектура спроектирована от слоёв движка до плана vertical slice. Готов к Стадии 4 (Реализация/код) — начиная с vertical slice (T-008).
+
+---
+
 ## 2026-10-26 — v0.32: Внедрение аудита Модели B — все этапы (D-015..D-017 + правки) ⭐⭐⭐
 
 **Тип**: MAJOR (5 версий за один цикл: v0.28-v0.32)
