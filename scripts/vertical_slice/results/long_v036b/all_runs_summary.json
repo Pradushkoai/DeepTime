@@ -65,7 +65,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.3
+    "elapsed_seconds": 0.31
   },
   {
     "config": {
@@ -200,7 +200,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.32
+    "elapsed_seconds": 0.33
   },
   {
     "config": {
@@ -395,7 +395,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.31
+    "elapsed_seconds": 0.32
   },
   {
     "config": {
@@ -523,7 +523,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.3
+    "elapsed_seconds": 0.31
   },
   {
     "config": {
@@ -720,7 +720,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.31
+    "elapsed_seconds": 0.29
   },
   {
     "config": {
@@ -917,7 +917,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.32
+    "elapsed_seconds": 0.31
   },
   {
     "config": {
@@ -1376,7 +1376,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.27
+    "elapsed_seconds": 0.26
   },
   {
     "config": {
@@ -1765,7 +1765,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.3
+    "elapsed_seconds": 0.31
   },
   {
     "config": {
@@ -1898,7 +1898,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.21
+    "elapsed_seconds": 0.2
   },
   {
     "config": {
@@ -2032,7 +2032,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.3
+    "elapsed_seconds": 0.31
   },
   {
     "config": {
@@ -2097,7 +2097,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -2163,7 +2163,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.32
+    "elapsed_seconds": 0.33
   },
   {
     "config": {
@@ -2227,7 +2227,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.28
+    "elapsed_seconds": 0.29
   },
   {
     "config": {
@@ -2354,7 +2354,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.3
+    "elapsed_seconds": 0.32
   },
   {
     "config": {
@@ -2422,7 +2422,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -2489,7 +2489,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.34
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -2622,7 +2622,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.33
   },
   {
     "config": {
@@ -2687,7 +2687,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.3
+    "elapsed_seconds": 0.32
   },
   {
     "config": {
@@ -2751,7 +2751,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.31
+    "elapsed_seconds": 0.32
   },
   {
     "config": {
@@ -2815,7 +2815,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.28
+    "elapsed_seconds": 0.29
   },
   {
     "config": {
@@ -2879,7 +2879,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -2943,7 +2943,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.31
+    "elapsed_seconds": 0.32
   },
   {
     "config": {
@@ -3009,7 +3009,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.25
+    "elapsed_seconds": 0.26
   },
   {
     "config": {
@@ -3077,7 +3077,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.26
+    "elapsed_seconds": 0.28
   },
   {
     "config": {
@@ -3143,7 +3143,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.28
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -3206,7 +3206,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.3
+    "elapsed_seconds": 0.32
   },
   {
     "config": {
@@ -3271,7 +3271,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.31
   },
   {
     "config": {
@@ -3336,7 +3336,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.31
   },
   {
     "config": {
@@ -3400,7 +3400,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -3464,7 +3464,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -3528,7 +3528,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -3596,7 +3596,7 @@
     },
     "verdict_score": 0,
     "verdict_label": "❌❌❌ гибель",
-    "elapsed_seconds": 0.18
+    "elapsed_seconds": 0.19
   },
   {
     "config": {
@@ -3663,7 +3663,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.22
+    "elapsed_seconds": 0.24
   },
   {
     "config": {
@@ -3731,7 +3731,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.22
+    "elapsed_seconds": 0.24
   },
   {
     "config": {
@@ -3797,7 +3797,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.26
+    "elapsed_seconds": 0.27
   },
   {
     "config": {
@@ -3862,7 +3862,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.26
+    "elapsed_seconds": 0.28
   },
   {
     "config": {
@@ -3930,7 +3930,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.28
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -3995,7 +3995,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.28
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -4060,7 +4060,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.28
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -4124,7 +4124,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.28
+    "elapsed_seconds": 0.29
   },
   {
     "config": {
@@ -4190,7 +4190,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.32
+    "elapsed_seconds": 0.33
   },
   {
     "config": {
@@ -4257,7 +4257,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.28
+    "elapsed_seconds": 0.3
   },
   {
     "config": {
@@ -4323,7 +4323,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.31
+    "elapsed_seconds": 0.33
   },
   {
     "config": {
@@ -4388,7 +4388,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.3
+    "elapsed_seconds": 0.31
   },
   {
     "config": {
@@ -4453,7 +4453,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.31
+    "elapsed_seconds": 0.32
   },
   {
     "config": {
@@ -4518,7 +4518,7 @@
     },
     "verdict_score": 2,
     "verdict_label": "✅⚠️❌ выжили с проблемами",
-    "elapsed_seconds": 0.3
+    "elapsed_seconds": 0.32
   },
   {
     "config": {
@@ -4582,7 +4582,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.31
   },
   {
     "config": {
@@ -4646,7 +4646,7 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.31
   },
   {
     "config": {
@@ -4710,6 +4710,6 @@
     },
     "verdict_score": 3,
     "verdict_label": "✅✅✅ идеально",
-    "elapsed_seconds": 0.29
+    "elapsed_seconds": 0.3
   }
 ]

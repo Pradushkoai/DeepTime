@@ -28,9 +28,11 @@ PROTOTYPE = SCRIPT_DIR / "vertical_slice_prototype.py"
 RESULTS_DIR = SCRIPT_DIR / "results"
 
 
-def run_single(archetype: str, strategy: str, seed: int, turns: int, population: int) -> dict:
+def run_single(archetype: str, strategy: str, seed: int, turns: int, population: int,
+               json_path=None) -> dict:
     """Запустить один прогон и вернуть метрики из JSON"""
-    json_path = RESULTS_DIR / f"run_{archetype}_{strategy}_seed{seed}.json"
+    if json_path is None:
+        json_path = RESULTS_DIR / f"run_{archetype}_{strategy}_seed{seed}.json"
 
     cmd = [
         sys.executable, str(PROTOTYPE),
@@ -45,7 +47,7 @@ def run_single(archetype: str, strategy: str, seed: int, turns: int, population:
     ]
 
     start_time = time.time()
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     elapsed = time.time() - start_time
 
     if result.returncode != 0:
@@ -60,15 +62,23 @@ def run_single(archetype: str, strategy: str, seed: int, turns: int, population:
     return metrics
 
 
-def run_batch(archetypes, strategies, seeds, turns, population):
-    """Запустить серию прогонов"""
-    RESULTS_DIR.mkdir(exist_ok=True)
+def run_batch(archetypes, strategies, seeds, turns, population, output_subdir=None):
+    """Запустить серию прогонов
+
+    output_subdir: если задано, сохраняет в RESULTS_DIR/output_subdir/
+                   иначе в RESULTS_DIR/ (по умолчанию)
+    """
+    if output_subdir:
+        out_dir = RESULTS_DIR / output_subdir
+    else:
+        out_dir = RESULTS_DIR
+    out_dir.mkdir(exist_ok=True, parents=True)
 
     total = len(archetypes) * len(strategies) * len(seeds)
     print(f"\n🚀 Запуск {total} прогонов: {len(archetypes)} архетипов × "
           f"{len(strategies)} стратегий × {len(seeds)} seeds")
     print(f"   turns={turns}, population={population}")
-    print(f"   Папка результатов: {RESULTS_DIR}\n")
+    print(f"   Папка результатов: {out_dir}\n")
 
     all_results = []
     count = 0
@@ -78,7 +88,8 @@ def run_batch(archetypes, strategies, seeds, turns, population):
             for seed in seeds:
                 count += 1
                 print(f"  [{count}/{total}] {archetype:15s} | {strategy:6s} | seed={seed:3d} ...", end=" ", flush=True)
-                metrics = run_single(archetype, strategy, seed, turns, population)
+                json_path = out_dir / f"run_{archetype}_{strategy}_seed{seed}.json"
+                metrics = run_single(archetype, strategy, seed, turns, population, json_path)
                 if metrics:
                     verdict_label = metrics["verdict_label"]
                     pop_final = metrics["summary"]["population_final"]
@@ -89,13 +100,13 @@ def run_batch(archetypes, strategies, seeds, turns, population):
                     print("ОШИБКА")
 
     # Сводный JSON
-    summary_path = RESULTS_DIR / "all_runs_summary.json"
+    summary_path = out_dir / "all_runs_summary.json"
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(all_results, f, ensure_ascii=False, indent=2)
     print(f"\n📄 Сводный JSON: {summary_path}")
 
     # CSV
-    csv_path = RESULTS_DIR / "all_runs_summary.csv"
+    csv_path = out_dir / "all_runs_summary.csv"
     with open(csv_path, "w", encoding="utf-8") as f:
         f.write("archetype,strategy,seed,population_final,population_change,"
                 "winters_survived,total_events,total_decisions,decisions_per_hour,"

@@ -1,0 +1,63 @@
+{
+  "config": {
+    "seed": 42,
+    "strategy": "smart",
+    "archetype": "COASTAL",
+    "population": 200,
+    "turns": 400
+  },
+  "summary": {
+    "turns_played": 400,
+    "years_simulated": 100,
+    "population_start": 200,
+    "population_final": 117,
+    "population_change": -83,
+    "hungry_final": 40,
+    "winters_survived": 100,
+    "total_events": 869,
+    "total_decisions": 869,
+    "decisions_per_hour": 130.35,
+    "max_chief_pressure": 20,
+    "reforms_completed": 42,
+    "chief_age": 27,
+    "chief_era": "YOUNG",
+    "chief_legitimacy": 80,
+    "chronicle_entries": 265
+  },
+  "events_by_type": {
+    "GOOD_HARVEST": 22,
+    "WINTER_COMING": 46,
+    "WEDDING": 6,
+    "RITUAL_OF_YEAR": 71,
+    "BIRTH_NOTABLE": 54,
+    "HUNGER": 396,
+    "DEATH_ELDER": 232,
+    "CHAMPION_PROPOSES": 42
+  },
+  "death_causes": {
+    "старость": 233,
+    "хищник": 2,
+    "болезнь": 2
+  },
+  "factions_final": {
+    "Охотники": {
+      "power": 50,
+      "grievance": 0
+    },
+    "Жречество": {
+      "power": 15,
+      "grievance": 0
+    },
+    "Старейшины": {
+      "power": 39,
+      "grievance": 0
+    }
+  },
+  "verdict": {
+    "tribe_survived": true,
+    "chief_alive": true,
+    "no_rebellions": true
+  },
+  "verdict_score": 3,
+  "verdict_label": "✅✅✅ идеально"
+}

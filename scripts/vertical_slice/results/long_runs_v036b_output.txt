@@ -6,7 +6,7 @@ DeepTime — LONG RUNS (долгие прогоны)
 
 🚀 Запуск 72 прогонов: 8 архетипов × 3 стратегий × 3 seeds
    turns=400, population=50
-   Папка результатов: /home/z/my-project/DeepTime/scripts/vertical_slice/results
+   Папка результатов: /home/z/my-project/DeepTime/scripts/vertical_slice/results/long_v036b
 
   [1/72] FOREST          | auto   | seed= 42 ... нас=114 давл=100 | ✅✅✅ идеально
   [2/72] FOREST          | auto   | seed=100 ... нас=113 давл=100 | ✅✅✅ идеально
@@ -81,8 +81,8 @@ DeepTime — LONG RUNS (долгие прогоны)
   [71/72] ARCTIC          | smart  | seed=100 ... нас=104 давл= 20 | ✅✅✅ идеально
   [72/72] ARCTIC          | smart  | seed=1000 ... нас= 96 давл= 20 | ✅✅✅ идеально
 
-📄 Сводный JSON: /home/z/my-project/DeepTime/scripts/vertical_slice/results/all_runs_summary.json
-📄 Сводный CSV: /home/z/my-project/DeepTime/scripts/vertical_slice/results/all_runs_summary.csv
+📄 Сводный JSON: /home/z/my-project/DeepTime/scripts/vertical_slice/results/long_v036b/all_runs_summary.json
+📄 Сводный CSV: /home/z/my-project/DeepTime/scripts/vertical_slice/results/long_v036b/all_runs_summary.csv
 
 ================================================================================
 СПЕЦИФИЧЕСКИЙ АНАЛИЗ ДЛЯ ДОЛГИХ ПРОГОНОВ

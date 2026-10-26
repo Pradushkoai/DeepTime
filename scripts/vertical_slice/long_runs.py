@@ -37,7 +37,8 @@ def main():
     print("400 ходов = 100 лет симуляции")
     print("=" * 80)
 
-    results = run_batch(archetypes, strategies, seeds, turns=400, population=50)
+    results = run_batch(archetypes, strategies, seeds, turns=400, population=50,
+                       output_subdir="long_v036b")
 
     # Дополнительный анализ для долгих прогонов
     print("\n" + "=" * 80)

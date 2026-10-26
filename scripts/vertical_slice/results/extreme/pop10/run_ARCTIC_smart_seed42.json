@@ -1,0 +1,63 @@
+{
+  "config": {
+    "seed": 42,
+    "strategy": "smart",
+    "archetype": "ARCTIC",
+    "population": 10,
+    "turns": 400
+  },
+  "summary": {
+    "turns_played": 400,
+    "years_simulated": 100,
+    "population_start": 10,
+    "population_final": 117,
+    "population_change": 107,
+    "hungry_final": 31,
+    "winters_survived": 100,
+    "total_events": 508,
+    "total_decisions": 508,
+    "decisions_per_hour": 76.2,
+    "max_chief_pressure": 97,
+    "reforms_completed": 44,
+    "chief_age": 27,
+    "chief_era": "YOUNG",
+    "chief_legitimacy": 80,
+    "chronicle_entries": 50
+  },
+  "events_by_type": {
+    "CHAMPION_PROPOSES": 44,
+    "WINTER_COMING": 50,
+    "RITUAL_OF_YEAR": 70,
+    "HUNGER": 253,
+    "WEDDING": 7,
+    "GOOD_HARVEST": 15,
+    "BIRTH_NOTABLE": 55,
+    "DEATH_ELDER": 14
+  },
+  "death_causes": {
+    "старость": 15,
+    "хищник": 3,
+    "болезнь": 3
+  },
+  "factions_final": {
+    "Охотники": {
+      "power": 75,
+      "grievance": 18
+    },
+    "Жречество": {
+      "power": 15,
+      "grievance": 18
+    },
+    "Старейшины": {
+      "power": 31,
+      "grievance": 18
+    }
+  },
+  "verdict": {
+    "tribe_survived": true,
+    "chief_alive": true,
+    "no_rebellions": true
+  },
+  "verdict_score": 3,
+  "verdict_label": "✅✅✅ идеально"
+}

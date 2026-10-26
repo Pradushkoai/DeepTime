@@ -1,0 +1,62 @@
+{
+  "config": {
+    "seed": 42,
+    "strategy": "smart",
+    "archetype": "RIVER_VALLEY",
+    "population": 500,
+    "turns": 400
+  },
+  "summary": {
+    "turns_played": 400,
+    "years_simulated": 100,
+    "population_start": 500,
+    "population_final": 106,
+    "population_change": -394,
+    "hungry_final": 11,
+    "winters_survived": 100,
+    "total_events": 1278,
+    "total_decisions": 1278,
+    "decisions_per_hour": 191.7,
+    "max_chief_pressure": 19,
+    "reforms_completed": 49,
+    "chief_age": 28,
+    "chief_era": "YOUNG",
+    "chief_legitimacy": 80,
+    "chronicle_entries": 655
+  },
+  "events_by_type": {
+    "CHAMPION_PROPOSES": 49,
+    "HUNGER": 396,
+    "DEATH_ELDER": 628,
+    "GOOD_HARVEST": 25,
+    "RITUAL_OF_YEAR": 73,
+    "WINTER_COMING": 57,
+    "BIRTH_NOTABLE": 50
+  },
+  "death_causes": {
+    "старость": 631,
+    "болезнь": 3,
+    "хищник": 4
+  },
+  "factions_final": {
+    "Охотники": {
+      "power": 61,
+      "grievance": 0
+    },
+    "Жречество": {
+      "power": 15,
+      "grievance": 0
+    },
+    "Старейшины": {
+      "power": 75,
+      "grievance": 0
+    }
+  },
+  "verdict": {
+    "tribe_survived": true,
+    "chief_alive": true,
+    "no_rebellions": true
+  },
+  "verdict_score": 3,
+  "verdict_label": "✅✅✅ идеально"
+}
