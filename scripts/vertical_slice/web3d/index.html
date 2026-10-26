@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepTime 3D — Vertical Slice</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI',sans-serif; background:#0d1117; color:#e0e0e0; overflow:hidden; }
+canvas#canvas3d { position:fixed; top:0; left:0; z-index:0; }
+
+.overlay { position:fixed; z-index:10; pointer-events:none; }
+.overlay * { pointer-events:auto; }
+
+/* Top bar */
+.topBar { top:0; left:0; right:0; padding:10px 15px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  background:linear-gradient(180deg,rgba(13,17,23,0.9),rgba(13,17,23,0.3)); }
+.topBar button { background:#f5a623; color:#0d1117; border:none; padding:7px 14px; border-radius:6px; cursor:pointer;
+  font-weight:bold; font-size:13px; transition:all 0.2s; }
+.topBar button:hover { background:#ffb84d; transform:translateY(-1px); }
+.topBar button.sec { background:#238636; color:#fff; }
+.topBar button.sec:hover { background:#2ea043; }
+.topBar button.dng { background:#da3633; color:#fff; }
+.topBar select, .topBar input { background:#0d1117; color:#e0e0e0; border:1px solid #30363d; padding:4px 6px;
+  border-radius:4px; font-size:12px; }
+.topBar .spacer { flex:1; }
+.seasonInfo { display:flex; gap:15px; align-items:center; font-size:15px; font-weight:bold; text-shadow:0 0 8px #000; }
+.seasonInfo span { color:#f5a623; }
+
+/* Left panel */
+.leftPanel { top:60px; left:10px; width:240px; max-height:90vh; overflow-y:auto; }
+.panel { background:rgba(22,27,34,0.92); border:1px solid #30363d; border-radius:8px; padding:10px; margin-bottom:10px; }
+.panelTitle { font-size:11px; color:#8b949e; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;
+  border-bottom:1px solid #21262d; padding-bottom:4px; }
+.row { display:flex; justify-content:space-between; padding:3px 0; font-size:13px; }
+.row .lbl { color:#8b949e; }
+.row .val { font-weight:bold; }
+.val.good { color:#3fb950; } .val.warn { color:#d29922; } .val.bad { color:#f85149; }
+.bar { height:8px; background:#21262d; border-radius:4px; overflow:hidden; margin-top:3px; }
+.barFill { height:100%; border-radius:4px; transition:width 0.3s; }
+.barFill.press { background:linear-gradient(90deg,#3fb950 0%,#d29922 60%,#f85149 100%); }
+.barFill.griev { background:linear-gradient(90deg,#3fb950 0%,#d29922 60%,#f85149 100%); }
+.resGrid { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+.resCard { background:#21262d; padding:5px 8px; border-radius:5px; font-size:12px; }
+.resCard b { color:#f5a623; }
+.actTags { display:flex; flex-wrap:wrap; gap:3px; }
+.actTag { padding:2px 6px; border-radius:3px; font-size:10px; font-weight:bold; }
+
+/* Right panel */
+.rightPanel { top:60px; right:10px; width:260px; max-height:90vh; overflow-y:auto; }
+.fac { background:#1c2128; border-radius:5px; padding:6px; margin-bottom:5px; }
+.facN { font-weight:bold; font-size:12px; } .facP { color:#8b949e; font-size:11px; }
+.facG { font-size:10px; color:#8b949e; margin:2px 0; }
+.logBox { background:#0d1117; border-radius:5px; padding:6px; max-height:160px; overflow-y:auto;
+  font-size:11px; font-family:Consolas,monospace; }
+.chEntry { padding:2px 0; border-bottom:1px solid #161b22; color:#8b949e; }
+.chY { color:#f5a623; }
+
+/* Game over */
+.gameOver { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:100;
+  background:#2a1a1a; border:3px solid #f85149; border-radius:10px; padding:40px; text-align:center; }
+.gameOver h2 { color:#f85149; font-size:28px; margin-bottom:10px; }
+.gameOver p { color:#8b7a6a; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:#0d1117; }
+::-webkit-scrollbar-thumb { background:#30363d; border-radius:3px; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas3d"></canvas>
+
+<!-- Top bar -->
+<div class="overlay topBar">
+  <button onclick="nextTurn()">▶ Ход</button>
+  <button class="sec" onclick="autoPlay(5)">⏩ 5</button>
+  <button class="sec" onclick="autoPlay(20)">⏩ 20</button>
+  <div class="seasonInfo">
+    <span id="seasonLabel">☀️ ЛЕТО</span>
+    <span id="yearLabel">-10000 до н.э.</span>
+    <span id="turnLabel">Ход 0</span>
+    <span id="popLabel">👥 50</span>
+    <span id="hungryLabel" style="color:#f85149;display:none;">🍗 голод: 0</span>
+  </div>
+  <div class="spacer"></div>
+  <select id="selArch">
+    <option>FOREST</option><option>STEPPE</option><option>RIVER_VALLEY</option><option>COASTAL</option>
+    <option>MOUNTAIN</option><option>DESERT</option><option>TROPICAL</option><option>ARCTIC</option>
+  </select>
+  <input id="inpSeed" type="number" value="42" style="width:50px;" title="Seed">
+  <input id="inpPop" type="number" value="50" style="width:50px;" title="Population">
+  <button class="dng" onclick="resetGame()">🔄 Новая игра</button>
+</div>
+
+<!-- Left panel -->
+<div class="overlay leftPanel">
+  <div class="panel">
+    <div class="panelTitle">👑 Вождь</div>
+    <div class="row"><span class="lbl">Имя</span><span class="val" id="chiefName">—</span></div>
+    <div class="row"><span class="lbl">Возраст / Эра</span><span class="val" id="chiefAge">—</span></div>
+    <div class="row"><span class="lbl">Легитимность</span><span class="val" id="chiefLegit">—</span></div>
+    <div class="row"><span class="lbl">Давление</span><span class="val" id="chiefPress">—</span></div>
+    <div class="bar"><div class="barFill press" id="pressBar" style="width:0%"></div></div>
+    <div class="row" style="margin-top:4px;"><span class="lbl">Реформ</span><span class="val good" id="chiefReforms">0</span></div>
+  </div>
+  <div class="panel">
+    <div class="panelTitle">📦 Запасы</div>
+    <div class="resGrid">
+      <div class="resCard">🥩 Мясо: <b id="resMeat">0</b></div>
+      <div class="resCard">🍓 Ягоды: <b id="resBerries">0</b></div>
+      <div class="resCard">🐟 Рыба: <b id="resFish">0</b></div>
+      <div class="resCard">🪵 Дерево: <b id="resWood">0</b></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panelTitle">👥 Действия граждан</div>
+    <div class="actTags" id="actTags"></div>
+  </div>
+</div>
+
+<!-- Right panel -->
+<div class="overlay rightPanel">
+  <div class="panel">
+    <div class="panelTitle">⚔️ Фракции</div>
+    <div id="factions"></div>
+  </div>
+  <div class="panel">
+    <div class="panelTitle">📖 Хроника</div>
+    <div class="logBox" id="chronicle"></div>
+  </div>
+  <div class="panel">
+    <div class="panelTitle">📜 Решения</div>
+    <div class="logBox" id="recentDec"></div>
+  </div>
+  <div class="panel">
+    <div class="panelTitle">📊 Метрики</div>
+    <div class="row"><span class="lbl">Событий</span><span class="val" id="mEvents">0</span></div>
+    <div class="row"><span class="lbl">Решений</span><span class="val" id="mDecisions">0</span></div>
+    <div class="row"><span class="lbl">Зим пережито</span><span class="val" id="mWinters">0</span></div>
+    <div class="row"><span class="lbl">Макс. давление</span><span class="val" id="mPressure">0</span></div>
+  </div>
+</div>
+
+<!-- Game over -->
+<div class="gameOver" id="gameOver">
+  <h2>💀 Племя погибло</h2>
+  <p>Зим пережито: <span id="goWinters">0</span><br>Год: <span id="goYear">0</span> до н.э.<br>Так закончилась их история.</p>
+  <br><button class="dng" onclick="resetGame()">Начать заново</button>
+</div>
+
+<!-- Three.js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<!-- Game scripts -->
+<script src="sim.js"></script>
+<script src="render.js"></script>
+<script src="ui.js"></script>
+
+<script>
+// Start game
+start();
+</script>
+
+</body>
+</html>
