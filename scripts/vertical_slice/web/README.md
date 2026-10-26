@@ -2,17 +2,43 @@
 
 > 📋 Flask-приложение, которое запускает симуляцию и позволяет игроку делать ходы и выбирать в событиях через браузер.
 
-## 🚀 Запуск
+## 🚀 Запуск под Windows (одной командой)
+
+### Вариант 1: .bat файл (проще)
+
+1. Скачай `run_windows.bat` из репозитория:
+   https://github.com/Pradushkoai/DeepTime/raw/main/scripts/vertical_slice/web/run_windows.bat
+
+2. Дважды кликни на файл.
+
+Скрипт сам:
+- Клонирует репо в `C:\Users\<ты>\DeepTime`
+- Установит портативный Python (через uv, без прав админа)
+- Поставит Flask
+- Запустит сервер
+- Откроет браузер на `http://127.0.0.1:5001/`
+
+**Требования**: Windows 10/11, git (https://git-scm.com/download/win), интернет.
+
+### Вариант 2: PowerShell
+
+```powershell
+# Скачать и запустить одной командой:
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/Pradushkoai/DeepTime/main/scripts/vertical_slice/web/run_windows.ps1 | iex"
+```
+
+Или вручную:
+1. Скачай `run_windows.ps1`
+2. Правый клик → "Run with PowerShell"
+
+### Вариант 3: Ручной запуск (если уже есть Python)
 
 ```bash
-# Установить Flask (если не установлен)
-python3 -m pip install flask
-
-# Запустить
-python3 scripts/vertical_slice/web/web_app.py
-
-# Открыть в браузере
-# http://127.0.0.1:5001/
+git clone https://github.com/Pradushkoai/DeepTime.git
+cd DeepTime
+python -m pip install flask
+python scripts/vertical_slice/web/web_app.py
+# → открой http://127.0.0.1:5001/
 ```
 
 ## 🎮 Как играть
@@ -66,6 +92,8 @@ python3 scripts/vertical_slice/web/web_app.py
 ```
 scripts/vertical_slice/web/
 ├── web_app.py              # Flask-приложение
+├── run_windows.bat         # Windows launcher (.bat)
+├── run_windows.ps1         # Windows launcher (PowerShell)
 ├── templates/
 │   └── index.html          # главная страница
 └── README.md               # этот файл
