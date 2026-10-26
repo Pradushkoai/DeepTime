@@ -1,35 +1,41 @@
 // ============================================================================
-// DeepTime 3D — Simulation Engine (ported from Python v0.36b)
+// DeepTime 3D — Real-Time Simulation Engine v2.0
 // ============================================================================
 
-const SEASONS = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+const SEASONS = ['SPRING','SUMMER','AUTUMN','WINTER'];
 
 const ARCHETYPES = {
-  FOREST:       { hunt: 0.40, gather: 0.40, fish: 0.20, skills: { hunt:[20,45], gather:[25,50], fish:[15,30], build:[15,30] } },
-  STEPPE:       { hunt: 0.70, gather: 0.20, fish: 0.10, skills: { hunt:[40,65], gather:[15,30], fish:[10,20], build:[10,25] } },
-  RIVER_VALLEY: { hunt: 0.25, gather: 0.30, fish: 0.45, skills: { hunt:[15,30], gather:[25,45], fish:[40,65], build:[15,30] } },
-  COASTAL:      { hunt: 0.20, gather: 0.20, fish: 0.60, skills: { hunt:[15,30], gather:[15,30], fish:[50,70], build:[15,30] } },
-  MOUNTAIN:     { hunt: 0.60, gather: 0.30, fish: 0.10, skills: { hunt:[35,60], gather:[20,35], fish:[10,20], build:[20,35] } },
-  DESERT:       { hunt: 0.30, gather: 0.50, fish: 0.20, skills: { hunt:[25,45], gather:[30,50], fish:[15,25], build:[15,30] } },
-  TROPICAL:     { hunt: 0.20, gather: 0.60, fish: 0.20, skills: { hunt:[15,30], gather:[40,65], fish:[25,45], build:[15,30] } },
-  ARCTIC:       { hunt: 0.80, gather: 0.05, fish: 0.15, skills: { hunt:[45,70], gather:[10,20], fish:[25,45], build:[15,30] } },
+  FOREST:       { hunt:0.40, gather:0.40, fish:0.20, skills:{hunt:[20,45],gather:[25,50],fish:[15,30],build:[15,30]} },
+  STEPPE:       { hunt:0.70, gather:0.20, fish:0.10, skills:{hunt:[40,65],gather:[15,30],fish:[10,20],build:[10,25]} },
+  RIVER_VALLEY: { hunt:0.25, gather:0.30, fish:0.45, skills:{hunt:[15,30],gather:[25,45],fish:[40,65],build:[15,30]} },
+  COASTAL:      { hunt:0.20, gather:0.20, fish:0.60, skills:{hunt:[15,30],gather:[15,30],fish:[50,70],build:[15,30]} },
+  MOUNTAIN:     { hunt:0.60, gather:0.30, fish:0.10, skills:{hunt:[35,60],gather:[20,35],fish:[10,20],build:[20,35]} },
+  DESERT:       { hunt:0.30, gather:0.50, fish:0.20, skills:{hunt:[25,45],gather:[30,50],fish:[15,25],build:[15,30]} },
+  TROPICAL:     { hunt:0.20, gather:0.60, fish:0.20, skills:{hunt:[15,30],gather:[40,65],fish:[25,45],build:[15,30]} },
+  ARCTIC:       { hunt:0.80, gather:0.05, fish:0.15, skills:{hunt:[45,70],gather:[10,20],fish:[25,45],build:[15,30]} },
 };
 
 const NAMES_M = ['Борис','Карл','Олаф','Сигурд','Эрик','Хрольв','Гуннар','Торстен','Свен','Рагнар','Ивар','Бьорн','Ульф','Кнуд','Хакон'];
 const NAMES_F = ['Анна','Хельга','Фрейя','Сигрид','Тора','Ингрид','Астрид','Рагнхильд','Гудрун','Сольвейг','Брунхильда','Торгунна','Эльза','Карин'];
 
-// Simple seeded RNG
+// Points of interest in settlement (x, z coordinates in world space)
+const POI = {
+  fire:     { x: 0,    z: 0,    type: 'fire',    label: '🔥 Костёр' },
+  forest:   { x: -10,  z: -8,   type: 'forest',  label: '🌲 Лес' },
+  river:    { x: 10,   z: -6,   type: 'river',   label: '🏞️ Река' },
+  gather:   { x: -8,   z: 8,    type: 'gather',  label: '🍓 Ягоды' },
+  build:    { x: 4,    z: 6,    type: 'build',   label: '🏗️ Стройка' },
+  huts:     { x: 6,    z: -4,   type: 'huts',    label: '🏠 Хижины' },
+  storage:  { x: -4,   z: 4,    type: 'storage', label: '📦 Склад' },
+};
+
 class RNG {
   constructor(seed) { this.s = seed || 1; }
   next() { this.s = (this.s * 9301 + 49297) % 233280; return this.s / 233280; }
-  randint(a, b) { return Math.floor(this.next() * (b - a + 1)) + a; }
-  choice(arr) { return arr[Math.floor(this.next() * arr.length)]; }
+  randint(a,b) { return Math.floor(this.next()*(b-a+1))+a; }
+  choice(arr) { return arr[Math.floor(this.next()*arr.length)]; }
   random() { return this.next(); }
 }
-
-// ============================================================================
-// WORLD STATE
-// ============================================================================
 
 let WORLD = null;
 
@@ -38,52 +44,34 @@ function initWorld(archetype='FOREST', population=50, seed=42) {
   const arch = ARCHETYPES[archetype];
 
   const world = {
-    turn: 0, year: -10000, season: 'SUMMER', seed: seed, rng: rng,
-    archetype: archetype,
-    citizens: [],
-    factions: [],
-    chief: null,
-    settlement: { name: 'Стойбище у Реки', meat: 50, berries: 60, fish: 30, wood: 40, stone: 20, huts: 5 },
+    turn: 0, year: -10000, season: 'SUMMER', seed, rng, archetype,
+    citizens: [], factions: [], chief: null,
+    settlement: { name:'Стойбище у Реки', meat:50, berries:60, fish:30, wood:40, stone:20, huts:5 },
     pendingEvents: [], resolvedEvents: [], chronicle: [],
-    values: { safety:60, warlike:40, knowledge:30, nature:70, collective:70 },
-    priorities: { food:40, stockpile:30, build:10, tech:10, army:5, trade:5 },
+    priorities: { food:40, stockpile:30, build:10, army:5, trade:5 },
     techs: new Set([0,1,2]),
     metrics: { totalEvents:0, totalDecisions:0, wintersSurvived:0, maxPressure:0, turnsPlayed:0 },
     nextEventId: 1,
+    // Real-time state
+    seasonProgress: 0, // 0..1, fills up, when 1 → season change
+    seasonDuration: 20.0, // seconds per season (real-time)
+    paused: false,
+    speed: 1, // 1x, 2x, 3x
+    simTime: 0, // accumulated real time
   };
 
-  // Chief
   const chiefName = rng.choice(NAMES_M);
   const chiefSkills = genSkills(rng, arch);
-  world.chief = {
-    name: chiefName, age: rng.randint(25,35), era: 'YOUNG',
-    health: 100, legitimacy: 80, pressure: 0, heirId: -1, reforms: [],
-    huntSkill: Math.min(100, chiefSkills.hunt + 20),
-  };
+  world.chief = { name:chiefName, age:rng.randint(25,35), era:'YOUNG', health:100, legitimacy:80, pressure:0, heirId:-1, reforms:[] };
 
-  // Citizens
-  world.citizens.push({
-    id: 0, name: chiefName, gender:'M', age: world.chief.age,
-    huntSkill: world.chief.huntSkill, gatherSkill: chiefSkills.gather,
-    fishSkill: chiefSkills.fish, buildSkill: chiefSkills.build,
-    hunger:0, fatigue:0, loyalty:90, alive:true, action:'IDLE',
-    actionReason:'', x: 0.5, z: 0.5, // position in settlement
-  });
-
+  world.citizens.push(createCitizen(0, chiefName, 'M', world.chief.age, rng, arch, true));
   for (let i = 1; i < population; i++) {
     const gender = rng.random() < 0.5 ? 'M' : 'F';
     const age = rng.randint(0, 70);
-    const sk = genSkills(rng, arch);
-    world.citizens.push({
-      id: i, name: gender==='M' ? rng.choice(NAMES_M) : rng.choice(NAMES_F),
-      gender, age, huntSkill: sk.hunt, gatherSkill: sk.gather,
-      fishSkill: sk.fish, buildSkill: sk.build,
-      hunger:0, fatigue:0, loyalty: rng.randint(50,80), alive:true, action:'IDLE',
-      actionReason:'', x: rng.random()*0.8+0.1, z: rng.random()*0.8+0.1,
-    });
+    const name = gender === 'M' ? rng.choice(NAMES_M) : rng.choice(NAMES_F);
+    world.citizens.push(createCitizen(i, name, gender, age, rng, arch, false));
   }
 
-  // Factions
   world.factions = [
     { type:'HUNTERS', name:'Охотники', power:40, grievance:0, grievanceReason:'' },
     { type:'PRIESTS', name:'Жречество', power:25, grievance:0, grievanceReason:'' },
@@ -93,99 +81,241 @@ function initWorld(archetype='FOREST', population=50, seed=42) {
   return world;
 }
 
-function genSkills(rng, arch) {
-  const s = arch.skills;
+function createCitizen(id, name, gender, age, rng, arch, isChief) {
+  const sk = genSkills(rng, arch);
+  // Start position near fire
+  const angle = rng.random() * Math.PI * 2;
+  const dist = 1 + rng.random() * 3;
   return {
-    hunt: rng.randint(s.hunt[0], s.hunt[1]),
-    gather: rng.randint(s.gather[0], s.gather[1]),
-    fish: rng.randint(s.fish[0], s.fish[1]),
-    build: rng.randint(s.build[0], s.build[1]),
+    id, name, gender, age, alive: true,
+    huntSkill: isChief ? Math.min(100, sk.hunt + 20) : sk.hunt,
+    gatherSkill: sk.gather, fishSkill: sk.fish, buildSkill: sk.build,
+    hunger: 0, fatigue: 0, loyalty: 70 + rng.randint(0, 20),
+    action: 'IDLE', actionReason: '',
+    // Position and movement
+    x: POI.fire.x + Math.cos(angle) * dist,
+    z: POI.fire.z + Math.sin(angle) * dist,
+    targetX: POI.fire.x, targetZ: POI.fire.z,
+    speed: 2.0 + rng.random() * 1.0, // units per second
+    workTimer: 0, // seconds at current task
+    carrying: null, // {type:'meat', amount:1} when carrying resources
+    deathCause: '',
   };
 }
 
-// ============================================================================
-// SYSTEMS
-// ============================================================================
+function genSkills(rng, arch) {
+  const s = arch.skills;
+  return { hunt:rng.randint(s.hunt[0],s.hunt[1]), gather:rng.randint(s.gather[0],s.gather[1]),
+           fish:rng.randint(s.fish[0],s.fish[1]), build:rng.randint(s.build[0],s.build[1]) };
+}
 
 function aliveCitizens(w) { return w.citizens.filter(c => c.alive); }
 
-function sysNeeds(w) {
+// ============================================================================
+// REAL-TIME UPDATE (called every frame from render.js)
+// ============================================================================
+
+function updateRealTime(w, dt) {
+  if (w.paused) return;
+  dt *= w.speed; // apply speed multiplier
+
+  w.simTime += dt;
+  w.seasonProgress += dt / w.seasonDuration;
+
+  // Season change
+  if (w.seasonProgress >= 1.0) {
+    w.seasonProgress = 0;
+    advanceSeason(w);
+    runSeasonTick(w); // heavy simulation once per season
+  }
+
+  // Per-citizen real-time update
   for (const c of w.citizens) {
     if (!c.alive) continue;
-    c.hunger = Math.min(100, c.hunger + 15);
-    if (['HUNT','BUILD','MIGRATE'].includes(c.action)) c.fatigue = Math.min(100, c.fatigue + 20);
-    else if (c.action === 'REST') c.fatigue = Math.max(0, c.fatigue - 30);
-    else c.fatigue = Math.min(100, c.fatigue + 5);
+    updateCitizenRT(w, c, dt);
+  }
+
+  // Process pending events (non-blocking: they're shown as popups by UI)
+  // Auto-resolve after 10 seconds if player doesn't choose
+  for (let i = w.pendingEvents.length - 1; i >= 0; i--) {
+    const ev = w.pendingEvents[i];
+    ev.timer = (ev.timer || 15) - dt;
+    if (ev.timer <= 0) {
+      // Auto-resolve with smart choice
+      const idx = smartChoice(w, ev);
+      resolveEvent(w, ev, idx);
+      w.pendingEvents.splice(i, 1);
+      w.metrics.totalDecisions++;
+    }
   }
 }
 
-function sysActions(w) {
+function updateCitizenRT(w, c, dt) {
+  // Needs grow over time
+  c.hunger = Math.min(100, c.hunger + dt * 2.0);
+  if (['HUNT','FISH','BUILD','GATHER'].includes(c.action))
+    c.fatigue = Math.min(100, c.fatigue + dt * 3.0);
+  else if (c.action === 'REST')
+    c.fatigue = Math.max(0, c.fatigue - dt * 8.0);
+
+  // Check if needs new action (every few seconds or when arrived)
+  const dx = c.targetX - c.x;
+  const dz = c.targetZ - c.z;
+  const dist = Math.sqrt(dx*dx + dz*dz);
+
+  if (dist < 0.5) {
+    // Arrived at target — work
+    c.workTimer += dt;
+
+    // Produce resources while working
+    if (c.action === 'HUNT' && c.workTimer > 3.0) {
+      c.workTimer = 0;
+      const arch = ARCHETYPES[w.archetype];
+      const succ = Math.min(1, c.huntSkill/60 + 0.4);
+      const meat = Math.max(1, Math.round(succ * 3 * arch.hunt * 2.5));
+      w.settlement.meat += meat;
+      c.carrying = { type: 'meat', amount: meat };
+      // Go to storage to drop off
+      c.targetX = POI.storage.x + (Math.random()-0.5)*2;
+      c.targetZ = POI.storage.z + (Math.random()-0.5)*2;
+      c.action = 'CARRY';
+    } else if (c.action === 'GATHER' && c.workTimer > 2.5) {
+      c.workTimer = 0;
+      const arch = ARCHETYPES[w.archetype];
+      const succ = Math.min(1, c.gatherSkill/60 + 0.5);
+      const berries = Math.max(1, Math.round(succ * 4 * arch.gather * 4));
+      w.settlement.berries += berries;
+      c.carrying = { type: 'berries', amount: berries };
+      c.targetX = POI.storage.x + (Math.random()-0.5)*2;
+      c.targetZ = POI.storage.z + (Math.random()-0.5)*2;
+      c.action = 'CARRY';
+    } else if (c.action === 'FISH' && c.workTimer > 3.0) {
+      c.workTimer = 0;
+      const arch = ARCHETYPES[w.archetype];
+      const succ = Math.min(1, c.fishSkill/60 + 0.5);
+      const fish = Math.max(1, Math.round(succ * 3 * arch.fish * 3));
+      w.settlement.fish += fish;
+      c.carrying = { type: 'fish', amount: fish };
+      c.targetX = POI.storage.x + (Math.random()-0.5)*2;
+      c.targetZ = POI.storage.z + (Math.random()-0.5)*2;
+      c.action = 'CARRY';
+    } else if (c.action === 'BUILD' && c.workTimer > 5.0) {
+      c.workTimer = 0;
+      w.settlement.wood = Math.max(0, w.settlement.wood - 1);
+      c.targetX = POI.storage.x + (Math.random()-0.5)*2;
+      c.targetZ = POI.storage.z + (Math.random()-0.5)*2;
+      c.action = 'CARRY';
+    } else if (c.action === 'CARRY' && c.workTimer > 0.5) {
+      c.workTimer = 0;
+      c.carrying = null;
+      // Choose next action
+      chooseActionRT(w, c);
+    } else if (c.action === 'REST' && c.fatigue < 20) {
+      c.workTimer = 0;
+      chooseActionRT(w, c);
+    } else if (c.action === 'EAT' && c.workTimer > 1.5) {
+      c.workTimer = 0;
+      c.hunger = Math.max(0, c.hunger - 50);
+      chooseActionRT(w, c);
+    } else if (c.action === 'RITUAL' && c.workTimer > 4.0) {
+      c.workTimer = 0;
+      chooseActionRT(w, c);
+    }
+  } else {
+    // Move toward target
+    const moveDist = c.speed * dt;
+    if (dist > 0) {
+      c.x += (dx / dist) * Math.min(moveDist, dist);
+      c.z += (dz / dist) * Math.min(moveDist, dist);
+    }
+  }
+
+  // Eat if very hungry and at fire
+  if (c.hunger > 70 && c.action !== 'EAT' && dist < 3) {
+    const s = w.settlement;
+    if (s.meat > 0 || s.fish > 0 || s.berries > 0) {
+      c.action = 'EAT';
+      c.targetX = POI.fire.x + (Math.random()-0.5)*2;
+      c.targetZ = POI.fire.z + (Math.random()-0.5)*2;
+      c.workTimer = 0;
+    }
+  }
+
+  // Rest if very tired
+  if (c.fatigue > 80 && c.action !== 'REST') {
+    c.action = 'REST';
+    c.targetX = POI.huts.x + (Math.random()-0.5)*3;
+    c.targetZ = POI.huts.z + (Math.random()-0.5)*3;
+    c.workTimer = 0;
+  }
+
+  // Death from hunger
+  if (c.hunger >= 100 && w.rng.random() < dt * 0.05) {
+    c.alive = false;
+    c.deathCause = 'голод';
+    w.chronicle.push({ year: w.year, season: w.season, entry: `${c.name} умер от голода` });
+  }
+}
+
+function chooseActionRT(w, c) {
+  if (c.age < 12) {
+    c.action = c.hunger > 50 ? 'GATHER' : 'IDLE';
+    c.targetX = POI.gather.x + (Math.random()-0.5)*3;
+    c.targetZ = POI.gather.z + (Math.random()-0.5)*3;
+    return;
+  }
+
   const arch = ARCHETYPES[w.archetype];
   const shares = arch;
   const fp = w.priorities.food, sp = w.priorities.stockpile;
-  const hungryCount = aliveCitizens(w).filter(c => c.hunger > 50).length;
+  const hungryCount = aliveCitizens(w).filter(ci => ci.hunger > 50).length;
   const foodCrisis = hungryCount > 10;
 
-  for (const c of w.citizens) {
-    if (!c.alive) continue;
-    if (c.age < 12) { c.action = c.hunger > 30 ? 'GATHER' : 'REST'; continue; }
-    let sm = c.age >= 60 ? 0.5 : 1.0;
+  const utils = {};
+  utils.HUNT = (c.hunger>30 ? c.hunger*0.6 : 0) + (foodCrisis?30:0) + fp*0.5*shares.hunt + sp*0.4*shares.hunt + c.huntSkill*0.3;
+  utils.GATHER = (c.hunger>30 ? c.hunger*0.5 : 0) + (foodCrisis?25:0) + fp*0.5*shares.gather + c.gatherSkill*0.3;
+  utils.FISH = shares.fish>0.1 ? ((c.hunger>30 ? c.hunger*0.5 : 0) + (foodCrisis?25:0) + fp*0.5*shares.fish + c.fishSkill*0.3) : 0;
+  utils.BUILD = foodCrisis ? 0 : (w.priorities.build>15 ? w.priorities.build*0.3 : 0) + c.buildSkill*0.2;
+  utils.REST = c.fatigue > 70 ? c.fatigue * 0.8 : 0;
+  utils.RITUAL = (w.season === 'WINTER' && w.rng.random() < 0.3) ? 15 : 0;
 
-    const utils = {};
-    utils.HUNT = (c.hunger>30 ? c.hunger*0.6 : 0) + (foodCrisis?30:0) + fp*0.5*shares.hunt + sp*0.4*shares.hunt + c.huntSkill*0.3;
-    utils.GATHER = (c.hunger>30 ? c.hunger*0.5 : 0) + (foodCrisis?25:0) + fp*0.5*shares.gather + c.gatherSkill*0.3;
-    utils.FISH = shares.fish>0.1 ? ((c.hunger>30 ? c.hunger*0.5 : 0) + (foodCrisis?25:0) + fp*0.5*shares.fish + c.fishSkill*0.3) : 0;
-    utils.BUILD = foodCrisis ? 0 : (w.priorities.build>15 ? w.priorities.build*0.3 : 0) + (w.settlement.huts < aliveCitizens(w).length/8 ? 15 : 0) + c.buildSkill*0.2;
-    utils.REST = c.fatigue > 70 ? c.fatigue * 0.8 : 0;
-    utils.RITUAL = (w.season === 'WINTER' && w.factions[1]) ? 15 : 0;
+  let best = 'IDLE', bestU = -1;
+  for (const [a, u] of Object.entries(utils)) { if (u > bestU) { bestU = u; best = a; } }
 
-    let best = 'IDLE', bestU = -1;
-    for (const [a, u] of Object.entries(utils)) { if (u > bestU) { bestU = u; best = a; } }
-    c.action = best;
-    // Assign random position based on action
-    if (best === 'HUNT') { c.x = 0.1 + w.rng.random()*0.3; c.z = 0.1 + w.rng.random()*0.3; }
-    else if (best === 'GATHER') { c.x = 0.6 + w.rng.random()*0.3; c.z = 0.1 + w.rng.random()*0.3; }
-    else if (best === 'FISH') { c.x = 0.1 + w.rng.random()*0.3; c.z = 0.6 + w.rng.random()*0.3; }
-    else if (best === 'BUILD') { c.x = 0.4 + w.rng.random()*0.2; c.z = 0.4 + w.rng.random()*0.2; }
-    else { c.x = 0.3 + w.rng.random()*0.4; c.z = 0.3 + w.rng.random()*0.4; }
-  }
+  c.action = best;
+  c.workTimer = 0;
+
+  // Set target based on action
+  if (best === 'HUNT') { c.targetX = POI.forest.x + (Math.random()-0.5)*4; c.targetZ = POI.forest.z + (Math.random()-0.5)*4; }
+  else if (best === 'GATHER') { c.targetX = POI.gather.x + (Math.random()-0.5)*4; c.targetZ = POI.gather.z + (Math.random()-0.5)*4; }
+  else if (best === 'FISH') { c.targetX = POI.river.x + (Math.random()-0.5)*4; c.targetZ = POI.river.z + (Math.random()-0.5)*4; }
+  else if (best === 'BUILD') { c.targetX = POI.build.x + (Math.random()-0.5)*3; c.targetZ = POI.build.z + (Math.random()-0.5)*3; }
+  else if (best === 'REST') { c.targetX = POI.huts.x + (Math.random()-0.5)*3; c.targetZ = POI.huts.z + (Math.random()-0.5)*3; }
+  else if (best === 'RITUAL') { c.targetX = POI.fire.x + (Math.random()-0.5)*2; c.targetZ = POI.fire.z + (Math.random()-0.5)*2; }
+  else { c.targetX = POI.fire.x + (Math.random()-0.5)*4; c.targetZ = POI.fire.z + (Math.random()-0.5)*4; }
 }
 
-function sysProduction(w) {
-  const arch = ARCHETYPES[w.archetype];
-  const s = w.settlement;
-  const sm = { SPRING:1.2, SUMMER:1.5, AUTUMN:1.2, WINTER:0.4 }[w.season];
+// ============================================================================
+// SEASON TICK (heavy simulation once per season)
+// ============================================================================
 
-  let meat=0, berries=0, fish=0, wood=0;
-  for (const c of w.citizens) {
-    if (!c.alive || c.age < 12) continue;
-    let mult = c.age >= 60 ? 0.5 : 1.0;
-    if (c.action === 'HUNT') {
-      const succ = Math.min(1, c.huntSkill/60+0.4)*mult*sm;
-      meat += succ > 0.3 ? Math.max(1, Math.round(succ*3*arch.hunt*2.5)) : 0;
-    } else if (c.action === 'GATHER') {
-      const succ = Math.min(1, c.gatherSkill/60+0.5)*mult*sm;
-      berries += succ > 0.3 ? Math.max(1, Math.round(succ*4*arch.gather*4)) : 0;
-    } else if (c.action === 'FISH') {
-      const succ = Math.min(1, c.fishSkill/60+0.5)*mult*sm;
-      fish += succ > 0.3 ? Math.max(1, Math.round(succ*3*arch.fish*3)) : 0;
-    } else if (c.action === 'BUILD') { wood += 1; }
-  }
-  s.meat += meat; s.berries += berries; s.fish += fish; s.wood += wood;
+function advanceSeason(w) {
+  const idx = SEASONS.indexOf(w.season);
+  w.season = SEASONS[(idx+1) % 4];
+  if (w.season === 'SPRING') w.year++;
+  if (w.season === 'WINTER') w.metrics.wintersSurvived++;
+  w.turn++;
+  w.metrics.turnsPlayed++;
 }
 
-function sysConsumption(w) {
+function runSeasonTick(w) {
+  // Consumption (eat from stockpiles)
   const s = w.settlement;
   const isWinter = w.season === 'WINTER';
-  const fastDay = (w.turn % 5 === 0);
-  const foodBase = isWinter ? 1 : (fastDay ? 0 : 1);
+  const ac = aliveCitizens(w);
 
-  for (const c of w.citizens) {
-    if (!c.alive) continue;
-    const isChild = c.age < 16;
-    let need = isChild ? Math.floor(foodBase/2) : foodBase;
-    if (need === 0) { c.hunger = Math.min(100, c.hunger+5); continue; }
-
+  for (const c of ac) {
+    const need = isWinter ? 2 : 1;
     let fed = false;
     if (s.meat >= need) { s.meat -= need; fed = true; }
     else if (s.fish >= need) { s.fish -= need; fed = true; }
@@ -196,91 +326,61 @@ function sysConsumption(w) {
       const tf = Math.min(s.fish, n); s.fish -= tf; n -= tf;
       s.berries -= n; fed = true;
     }
+    if (fed) c.hunger = Math.max(0, c.hunger - 30);
+    else c.hunger = Math.min(100, c.hunger + 20);
+  }
 
-    if (fed) c.hunger = Math.max(0, c.hunger - 40);
-    else {
-      c.hunger = Math.min(100, c.hunger + 15);
-      if (c.hunger >= 100) {
-        const dc = isChild ? 0.15 : 0.08;
-        if (w.rng.random() < dc) { c.alive = false; c.deathCause = 'голод'; }
+  // Chief pressure
+  const hungry = ac.filter(c => c.hunger > 60).length;
+  if (hungry > 0) w.chief.pressure = Math.min(100, w.chief.pressure + Math.min(5, Math.floor(hungry/4)));
+  if (isWinter) w.chief.pressure = Math.min(100, w.chief.pressure + 2);
+  if (hungry === 0) w.chief.pressure = Math.max(0, w.chief.pressure - 3);
+  w.metrics.maxPressure = Math.max(w.metrics.maxPressure, w.chief.pressure);
+
+  // Factions
+  const hunters = ac.filter(c => c.action === 'HUNT').length;
+  const elders = ac.filter(c => c.age >= 50).length;
+  w.factions[0].power = Math.min(100, Math.floor(hunters/Math.max(1,ac.length)*100)+20);
+  w.factions[2].power = Math.min(100, Math.floor(elders/Math.max(1,ac.length)*100)+25);
+  if (w.chief.pressure > 80) {
+    for (const f of w.factions) { if (f.grievance < 80) { f.grievance = Math.min(100, f.grievance+3); if (!f.grievanceReason) f.grievanceReason = 'давление вождя'; } }
+  }
+
+  // Aging (once per year = spring)
+  if (w.season === 'SPRING') {
+    for (const c of w.citizens) {
+      if (!c.alive) continue;
+      c.age++;
+      if (c.age >= 60) { const dc = (c.age-60)*0.01; if (w.rng.random() < dc) { c.alive = false; c.deathCause = 'старость'; } }
+    }
+    // Births
+    const bc = ac.length < 80 ? 0.3 : ac.length < 120 ? 0.15 : 0.05;
+    const fertile = ac.filter(c => c.gender === 'F' && c.age >= 18 && c.age <= 35);
+    for (const f of fertile) {
+      if (w.rng.random() < bc) {
+        const id = w.citizens.length;
+        const gender = w.rng.random() < 0.5 ? 'M' : 'F';
+        const name = gender === 'M' ? w.rng.choice(NAMES_M) : w.rng.choice(NAMES_F);
+        const nc = createCitizen(id, name, gender, 0, w.rng, ARCHETYPES[w.archetype], false);
+        w.citizens.push(nc);
       }
     }
   }
-}
 
-function sysFactions(w) {
-  const ac = aliveCitizens(w);
-  if (ac.length === 0) return;
-  const hunters = ac.filter(c => c.action === 'HUNT').length;
-  const ritual = ac.filter(c => c.action === 'RITUAL').length;
-  const elders = ac.filter(c => c.age >= 50).length;
-  w.factions[0].power = Math.min(100, Math.floor(hunters/ac.length*100)+20);
-  w.factions[1].power = Math.min(100, Math.floor(ritual/ac.length*100)+15);
-  w.factions[2].power = Math.min(100, Math.floor(elders/ac.length*100)+25);
-  if (w.chief.pressure > 80) {
-    for (const f of w.factions) {
-      if (f.grievance < 80) { f.grievance = Math.min(100, f.grievance+3); if (!f.grievanceReason) f.grievanceReason = 'давление вождя высокое'; }
-    }
+  // Crises
+  if (isWinter && w.rng.random() < 0.15) {
+    const loss = Math.floor(ac.length / 2);
+    s.meat = Math.max(0, s.meat - Math.floor(loss/2));
+    s.berries = Math.max(0, s.berries - Math.floor(loss/2));
+    w.chronicle.push({ year:w.year, season:w.season, entry:`Жёсткая зима: потеряно ~${loss} ед. еды` });
   }
-}
 
-function sysChief(w) {
-  const c = w.chief;
-  const hungry = aliveCitizens(w).filter(c => c.hunger > 60).length;
-  if (hungry > 0) c.pressure = Math.min(100, c.pressure + Math.min(5, Math.floor(hungry/4)));
-  if (w.season === 'WINTER') c.pressure = Math.min(100, c.pressure + 2);
-  const rd = w.chronicle.slice(-5).filter(e => /погиб|умер|Болезнь|Жёсткая/.test(e.entry)).length;
-  if (rd > 0) c.pressure = Math.min(100, c.pressure + rd);
-  if (hungry === 0 && rd === 0) c.pressure = Math.max(0, c.pressure - 2);
-  w.metrics.maxPressure = Math.max(w.metrics.maxPressure, c.pressure);
-  if (c.age >= 80 || c.pressure >= 100) fireEvent(w, 'CHIEF_DEATH', 'CRITICAL');
-}
+  // Check events
+  checkEvents(w);
 
-function sysAging(w) {
-  if (w.season !== 'SPRING') return;
-  for (const c of w.citizens) {
-    if (!c.alive) continue;
-    c.age++;
-    if (c.age >= 60) {
-      const dc = (c.age - 60) * 0.01;
-      if (w.rng.random() < dc) { c.alive = false; c.deathCause = 'старость'; }
-    }
-  }
-  // Births
-  const ac = aliveCitizens(w);
-  const bc = ac.length < 80 ? 0.3 : ac.length < 120 ? 0.15 : 0.05;
-  const fertile = ac.filter(c => c.gender === 'F' && c.age >= 18 && c.age <= 35);
-  for (const f of fertile) {
-    if (w.rng.random() < bc) {
-      w.citizens.push({
-        id: w.citizens.length, name: w.rng.random()<0.5 ? w.rng.choice(NAMES_M) : w.rng.choice(NAMES_F),
-        gender: w.rng.random()<0.5 ? 'M' : 'F', age: 0,
-        huntSkill: 5, gatherSkill: 5, fishSkill: 5, buildSkill: 5,
-        hunger: 0, fatigue: 0, loyalty: 70, alive: true, action: 'IDLE',
-        x: 0.3 + w.rng.random()*0.4, z: 0.3 + w.rng.random()*0.4,
-      });
-    }
-  }
-}
-
-function sysCrises(w) {
-  if (w.season === 'WINTER' && w.rng.random() < 0.15) {
-    const loss = Math.floor(aliveCitizens(w).length / 2);
-    w.settlement.meat = Math.max(0, w.settlement.meat - Math.floor(loss/2));
-    w.settlement.berries = Math.max(0, w.settlement.berries - Math.floor(loss/2));
-    w.chronicle.push({ year: w.year, season: w.season, entry: `Жёсткая зима: потеряно ~${loss} единиц еды` });
-  }
-  if (w.season === 'SUMMER' && w.rng.random() < 0.1) {
-    const loss = Math.floor(w.settlement.berries / 3);
-    w.settlement.berries -= loss;
-    w.chronicle.push({ year: w.year, season: w.season, entry: `Неурожай ягод: потеряно ${loss} единиц` });
-  }
-  if (w.rng.random() < 0.03) {
-    const ac = aliveCitizens(w);
-    if (ac.length > 0) {
-      const v = w.rng.choice(ac);
-      if (v.age >= 60 || v.age < 5) { v.alive = false; v.deathCause = 'болезнь'; w.chronicle.push({ year: w.year, season: w.season, entry: `Болезнь унесла ${v.name}` }); }
-    }
+  // Chief death
+  if (w.chief.age >= 80 || w.chief.pressure >= 100) {
+    fireEvent(w, 'CHIEF_DEATH', 'CRITICAL');
   }
 }
 
@@ -289,130 +389,116 @@ function sysCrises(w) {
 // ============================================================================
 
 function fireEvent(w, type, priority) {
-  const ev = { id: w.nextEventId++, type, priority, turn: w.turn };
+  if (w.pendingEvents.find(e => e.type === type)) return; // no duplicates
+  const ev = { id: w.nextEventId++, type, priority, turn: w.turn, timer: 15 };
   buildEvent(w, ev);
   w.pendingEvents.push(ev);
 }
 
 function buildEvent(w, ev) {
-  const chief = w.chief;
-  const s = w.settlement;
-  const ac = aliveCitizens(w);
+  const chief = w.chief, s = w.settlement, ac = aliveCitizens(w);
 
   if (ev.type === 'CHIEF_DEATH') {
-    ev.title = `Смерть вождя ${chief.name}`;
-    ev.text = `${chief.name} умер. Давление: ${chief.pressure}, возраст: ${chief.age}. Наследник: ${chief.heirId !== -1 ? 'есть' : 'НЕТ'}.`;
+    ev.title = `💀 Смерть вождя ${chief.name}`;
+    ev.text = `${chief.name} умер. Давление: ${chief.pressure}, возраст: ${chief.age}.`;
     ev.choices = [
-      { label: 'Долг отцов', desc: 'Давление наследуется, гасится 5/год', cons: { pressure:'inherit', leg:-5, griev:10 } },
-      { label: 'Новая метла', desc: 'Давление обнуляется, ценой легитимности', cons: { pressure:0, leg:-30, griev:20 } },
+      { label:'Долг отцов', desc:'Давление наследуется', cons:{pressure:'inherit',leg:-5,griev:10} },
+      { label:'Новая метла', desc:'Давление обнуляется', cons:{pressure:0,leg:-30,griev:20} },
     ];
   } else if (ev.type === 'WINTER_COMING') {
     ev.title = '❄️ Зима идёт!';
-    ev.text = `Холодный ветер с севера. До зимы ~90 дней. Запасы: мясо ${s.meat}, ягоды ${s.berries}, рыба ${s.fish}. Население: ${ac.length}.`;
+    ev.text = `До зимы ~90 дней. Запасы: 🥩${s.meat} 🍓${s.berries} 🐟${s.fish}. Население: ${ac.length}.`;
     ev.choices = [
-      { label: 'Удвоить запасы', desc: '+приоритет запасам, −приоритет еде', cons: { priorityShift: { stockpile:20, food:-10 } } },
-      { label: 'Продолжать как есть', desc: 'Без изменений', cons: {} },
-      { label: 'Кочёвка на юг', desc: 'Потеря 5 чел, +20 запасов', cons: { migrate: true } },
+      { label:'Удвоить запасы', desc:'+приоритет запасам', cons:{priorityShift:{stockpile:20,food:-10}} },
+      { label:'Продолжать как есть', desc:'Без изменений', cons:{} },
     ];
   } else if (ev.type === 'HUNGER') {
     const h = ac.filter(c => c.hunger > 70).length;
-    ev.title = `🍗 Голод! ${h} человек голодают`;
-    ev.text = `Запасы истощаются. ${h} граждан голодают. Что делать?`;
+    ev.title = `🍗 Голод! ${h} человек`;
+    ev.text = `Запасы истощаются. ${h} граждан голодают.`;
     ev.choices = [
-      { label: 'Общественные работы', desc: 'Все на добычу, +усталость', cons: { allToFood: true, fatigue: 20 } },
-      { label: 'Рацион', desc: 'Сократить потребление, +голод', cons: { ration: true } },
-      { label: 'Молиться', desc: 'Ритуал, +давление, шанс удачи', cons: { ritual: true, pressure: 10 } },
+      { label:'Общественные работы', desc:'Все на добычу', cons:{allToFood:true} },
+      { label:'Рацион', desc:'Сократить потребление', cons:{ration:true} },
+      { label:'Молиться', desc:'Ритуал, шанс удачи', cons:{ritual:true,pressure:10} },
     ];
   } else if (ev.type === 'FACTION_GRIEVANCE') {
-    const f = ev.faction || w.factions[0];
-    ev.title = `${f.name} в ярости (обида ${f.grievance})`;
-    ev.text = `${f.name} требует реформ. Причина: ${f.grievanceReason || 'не указана'}.`;
+    const f = ev.faction;
+    ev.title = `${f.name} в ярости`;
+    ev.text = `${f.name} требует реформ. Обида: ${f.grievance}.`;
     ev.choices = [
-      { label: 'Уступить', desc: '−легитимность, −обида', cons: { leg:-10, facGriev:-30, facType:f.type } },
-      { label: 'Подавить', desc: '+обида, риск мятежа', cons: { facGriev:10, facType:f.type } },
-      { label: 'Отложить', desc: 'Без изменений', cons: {} },
+      { label:'Уступить', desc:'−легитимность, −обида', cons:{leg:-10,facGriev:-30,facType:f.type} },
+      { label:'Подавить', desc:'+обида', cons:{facGriev:10,facType:f.type} },
+      { label:'Отложить', desc:'Без изменений', cons:{} },
     ];
   } else if (ev.type === 'CHAMPION_PROPOSES') {
     const champ = w.rng.choice(ac.filter(c => c.age >= 25));
-    if (!champ) { ev.title = 'Чемпион'; ev.text = 'Нет кандидата'; ev.choices = [{label:'OK',desc:'',cons:{}}]; return; }
-    ev.title = `Чемпион ${champ.name} предлагает реформу`;
-    ev.text = `${champ.name}, ${champ.age} лет, предлагает провести реформу «Обновление элит».`;
+    if (!champ) return;
+    ev.title = `⭐ Чемпион ${champ.name}`;
+    ev.text = `${champ.name} предлагает реформу «Обновление элит».`;
     ev.choices = [
-      { label: 'Поддержать', desc: 'Реформа стартует, +обида конкурентов', cons: { reform: true, griev:15 } },
-      { label: 'Отклонить', desc: '+легитимность', cons: { leg:5 } },
+      { label:'Поддержать', desc:'Реформа стартует', cons:{reform:true,griev:15} },
+      { label:'Отклонить', desc:'+легитимность', cons:{leg:5} },
     ];
   } else if (ev.type === 'RITUAL_OF_YEAR') {
-    ev.title = '🔥 Ритуал года: праздник огня';
-    ev.text = 'Жречество приглашает на ритуал. Это укрепляет мораль.';
+    ev.title = '🔥 Ритуал года';
+    ev.text = 'Жречество приглашает на ритуал.';
     ev.choices = [
-      { label: 'Великий пир', desc: '+мораль, −запасы', cons: { morale:true, meat:-10, berries:-5 } },
-      { label: 'Скромная церемония', desc: '−мораль, +запасы', cons: {} },
-      { label: 'Отказаться', desc: '−обида жречества', cons: { facGriev:20, facType:'PRIESTS' } },
+      { label:'Великий пир', desc:'+мораль, −запасы', cons:{morale:true,meat:-10,berries:-5} },
+      { label:'Скромно', desc:'Без затрат', cons:{} },
     ];
   } else if (ev.type === 'WEDDING') {
     const cands = ac.filter(c => c.age >= 18 && c.age <= 35);
-    if (cands.length === 0) { ev.title='Свадьба'; ev.text='Нет кандидатов'; ev.choices=[{label:'OK',desc:'',cons:{}}]; return; }
+    if (cands.length === 0) return;
     const c = w.rng.choice(cands);
     ev.title = `💍 Свадьба: ${c.name}`;
-    ev.text = `${c.name}, заметный член племени, берёт пару.`;
+    ev.text = `${c.name} берёт пару.`;
     ev.choices = [
-      { label: 'Пир за счёт казны', desc: '+мораль, −запасы', cons: { morale:true, meat:-5 } },
-      { label: 'Скромная церемония', desc: 'Без затрат', cons: {} },
+      { label:'Пир', desc:'+мораль, −запасы', cons:{morale:true,meat:-5} },
+      { label:'Скромно', desc:'Без затрат', cons:{} },
     ];
-  } else if (ev.type === 'BIRTH_NOTABLE') {
-    ev.title = '👶 Родился первый ребёнок нового рода';
-    ev.text = 'В семье заметного гражданина родился ребёнок. Племя растёт.';
-    ev.choices = [
-      { label: 'Праздник', desc: '+мораль, −запасы', cons: { morale:true, meat:-3 } },
-      { label: 'Записать в хронику', desc: '+культурная память', cons: { chronicle: 'Родился ребёнок нового рода' } },
-    ];
-  } else if (ev.type === 'DEATH_ELDER') {
-    const elders = ac.filter(c => c.age >= 50);
-    if (elders.length === 0) { ev.title='Смерть'; ev.text='Нет старейшин'; ev.choices=[{label:'OK',desc:'',cons:{}}]; return; }
-    const c = w.rng.choice(elders);
-    ev.title = `⚱️ Смерть старейшины ${c.name}`;
-    ev.text = `${c.name}, ${c.age} лет, умер. Племя скорбит.`;
-    ev.choices = [
-      { label: 'Похоронить с почестями', desc: '+давление, +хроника', cons: { pressure:5, chronicle:`Похороны ${c.name}` } },
-      { label: 'Скромные похороны', desc: 'Без затрат', cons: {} },
-    ];
-    c.alive = false; c.deathCause = 'старость';
   } else if (ev.type === 'GOOD_HARVEST') {
-    ev.title = '🍓 Богатый урожай ягод!';
-    ev.text = 'В этом сезоне ягод вдоволь. Запасы пополнились.';
+    ev.title = '🍓 Богатый урожай!';
+    ev.text = 'Ягод вдоволь.';
     ev.choices = [
-      { label: 'Запасти', desc: '+запасы ягод', cons: { berries:20 } },
-      { label: 'Пир', desc: '+мораль, часть в запасы', cons: { morale:true, berries:10 } },
+      { label:'Запасти', desc:'+ягоды', cons:{berries:20} },
+      { label:'Пир', desc:'+мораль', cons:{morale:true,berries:10} },
     ];
   } else if (ev.type === 'FIRST_POT') {
-    ev.title = '🎉 Первый горшок обожжён!';
-    ev.text = 'Гончар обожёг первый глиняный горшок. Племя празднует.';
+    ev.title = '🎉 Первый горшок!';
+    ev.text = 'Гончар обожёг первый горшок.';
     ev.choices = [
-      { label: 'Пир', desc: '+мораль, −запасы', cons: { morale:true, meat:-5 } },
-      { label: 'Записать в хронику', desc: '+культурная память', cons: { chronicle:'Первый горшок обожжён' } },
+      { label:'Пир', desc:'+мораль', cons:{morale:true,meat:-5} },
+      { label:'В хронику', desc:'+память', cons:{chronicle:'Первый горшок'} },
     ];
   }
 }
 
 function checkEvents(w) {
-  if (w.season === 'AUTUMN' && w.rng.random() < 0.5 && !w.pendingEvents.find(e => e.type === 'WINTER_COMING'))
-    fireEvent(w, 'WINTER_COMING', 'HIGH');
+  if (w.season === 'AUTUMN' && w.rng.random() < 0.5) fireEvent(w, 'WINTER_COMING', 'HIGH');
   const hungry = aliveCitizens(w).filter(c => c.hunger > 70).length;
-  if (hungry >= 5 && !w.pendingEvents.find(e => e.type === 'HUNGER'))
-    fireEvent(w, 'HUNGER', 'CRITICAL');
+  if (hungry >= 5) fireEvent(w, 'HUNGER', 'CRITICAL');
   for (const f of w.factions) {
-    if (f.grievance > 90 && !w.pendingEvents.find(e => e.type === 'FACTION_GRIEVANCE' && e.faction === f)) {
-      const ev = { id: w.nextEventId++, type: 'FACTION_GRIEVANCE', priority: 'HIGH', turn: w.turn, faction: f };
-      buildEvent(w, ev); w.pendingEvents.push(ev);
-    }
+    if (f.grievance > 90) { const ev = {id:w.nextEventId++,type:'FACTION_GRIEVANCE',priority:'HIGH',turn:w.turn,timer:15,faction:f}; buildEvent(w,ev); w.pendingEvents.push(ev); }
   }
   if (w.rng.random() < 0.10) fireEvent(w, 'CHAMPION_PROPOSES', 'NORMAL');
-  if (w.season === 'WINTER' && w.rng.random() < 0.7 && !w.pendingEvents.find(e => e.type === 'RITUAL_OF_YEAR'))
-    fireEvent(w, 'RITUAL_OF_YEAR', 'NORMAL');
-  if (w.rng.random() < 0.10) fireEvent(w, 'WEDDING', 'LOW');
-  if (w.rng.random() < 0.15) fireEvent(w, 'BIRTH_NOTABLE', 'LOW');
-  if (w.season === 'SUMMER' && w.rng.random() < 0.20) fireEvent(w, 'GOOD_HARVEST', 'LOW');
-  if (w.rng.random() < 0.05 && w.techs.has(10)) fireEvent(w, 'FIRST_POT', 'NORMAL');
+  if (w.season === 'WINTER' && w.rng.random() < 0.5) fireEvent(w, 'RITUAL_OF_YEAR', 'NORMAL');
+  if (w.rng.random() < 0.08) fireEvent(w, 'WEDDING', 'LOW');
+  if (w.season === 'SUMMER' && w.rng.random() < 0.15) fireEvent(w, 'GOOD_HARVEST', 'LOW');
+}
+
+function smartChoice(w, ev) {
+  let bestIdx = 0, bestScore = -999;
+  ev.choices.forEach((ch, i) => {
+    const c = ch.cons; let s = 0;
+    if (c.pressure === 0) s += 30;
+    if (c.leg > 0) s += c.leg;
+    if (c.griev < 0) s += 20;
+    if (c.allToFood) s += 15;
+    if (c.morale) s += 10;
+    if (c.reform) s += 15;
+    if (s > bestScore) { bestScore = s; bestIdx = i; }
+  });
+  return bestIdx;
 }
 
 function resolveEvent(w, ev, choiceIdx) {
@@ -423,25 +509,21 @@ function resolveEvent(w, ev, choiceIdx) {
   if (ev.type === 'CHIEF_DEATH') {
     handleChiefDeath(w, ch.label);
   } else {
-    if (c.pressure !== undefined) {
-      if (c.pressure === 'inherit') { /* keep pressure */ }
-      else w.chief.pressure = c.pressure;
-    }
+    if (c.pressure !== undefined) { if (c.pressure !== 'inherit') w.chief.pressure = c.pressure; }
     if (c.leg !== undefined) w.chief.legitimacy = Math.max(0, Math.min(100, w.chief.legitimacy + c.leg));
     if (c.griev !== undefined) for (const f of w.factions) f.grievance = Math.max(0, Math.min(100, f.grievance + c.griev));
     if (c.facGriev !== undefined) { const f = w.factions.find(f => f.type === c.facType); if (f) f.grievance = Math.max(0, Math.min(100, f.grievance + c.facGriev)); }
     if (c.meat !== undefined) w.settlement.meat = Math.max(0, w.settlement.meat + c.meat);
     if (c.berries !== undefined) w.settlement.berries = Math.max(0, w.settlement.berries + c.berries);
-    if (c.allToFood) for (const ci of w.citizens) { if (ci.alive && ci.age >= 16) ci.action = ci.huntSkill > ci.gatherSkill ? 'HUNT' : 'GATHER'; }
-    if (c.fatigue !== undefined) for (const ci of w.citizens) { if (ci.alive) ci.fatigue = Math.min(100, ci.fatigue + c.fatigue); }
+    if (c.allToFood) for (const ci of w.citizens) { if (ci.alive && ci.age >= 16) { ci.action = 'IDLE'; ci.workTimer = 0; } }
     if (c.ration) for (const ci of w.citizens) { if (ci.alive) ci.hunger = Math.min(100, ci.hunger + 10); }
     if (c.morale) for (const ci of w.citizens) { if (ci.alive) ci.loyalty = Math.min(100, ci.loyalty + 10); }
     if (c.reform) { w.chief.reforms.push('refresh_elites'); w.chief.pressure = Math.max(0, w.chief.pressure - 20); }
     if (c.priorityShift) for (const [k,v] of Object.entries(c.priorityShift)) w.priorities[k] = Math.max(0, Math.min(100, (w.priorities[k]||0) + v));
-    if (c.chronicle) w.chronicle.push({ year: w.year, season: w.season, entry: c.chronicle });
+    if (c.chronicle) w.chronicle.push({ year:w.year, season:w.season, entry:c.chronicle });
   }
 
-  w.resolvedEvents.push({ turn: w.turn, year: w.year, season: w.season, type: ev.type, title: ev.title, choice: ch.label });
+  w.resolvedEvents.push({ turn:w.turn, year:w.year, season:w.season, type:ev.type, title:ev.title, choice:ch.label });
   w.metrics.totalEvents++;
 }
 
@@ -449,61 +531,18 @@ function handleChiefDeath(w, label) {
   const oldP = w.chief.pressure;
   const ac = aliveCitizens(w);
   if (ac.length === 0) return;
+  const oldChief = w.citizens.find(c => c.name === w.chief.name && c.alive);
+  if (oldChief) { oldChief.alive = false; oldChief.deathCause = 'вождь'; }
   const heir = w.rng.choice(ac.filter(c => c.age >= 18 && c.age <= 40)) || w.rng.choice(ac);
-  w.chief = {
-    name: heir.name, age: heir.age, era: heir.age < 30 ? 'YOUNG' : 'MATURE',
-    health: 80, legitimacy: Math.max(50, w.chief.legitimacy - 10),
-    pressure: label === 'Долг отцов' ? oldP : 0, heirId: -1, reforms: [],
-  };
-  heir.alive = false; // old chief is gone (or heir takes role)
-  w.chronicle.push({ year: w.year, season: w.season, entry: `${heir.name} стал новым вождём (давление ${w.chief.pressure})` });
+  w.chief = { name:heir.name, age:heir.age, era:heir.age<30?'YOUNG':'MATURE', health:80,
+    legitimacy:Math.max(50, w.chief.legitimacy-10), pressure:label==='Долг отцов'?oldP:0, heirId:-1, reforms:[] };
+  w.chronicle.push({ year:w.year, season:w.season, entry:`${heir.name} стал вождём` });
 }
 
 // ============================================================================
-// GAME LOOP
+// STATE FOR UI
 // ============================================================================
 
-function advanceSeason(w) {
-  const idx = SEASONS.indexOf(w.season);
-  w.season = SEASONS[(idx + 1) % 4];
-  if (w.season === 'SPRING') w.year++;
-  if (w.season === 'WINTER') w.metrics.wintersSurvived++;
-}
-
-function simulateTurn(w) {
-  w.turn++; w.metrics.turnsPlayed++;
-  checkEvents(w);
-  sysNeeds(w);
-  sysActions(w);
-  sysProduction(w);
-  sysConsumption(w);
-  sysFactions(w);
-  sysChief(w);
-  sysAging(w);
-  sysCrises(w);
-  advanceSeason(w);
-  // Resolve pending events automatically (smart-ish)
-  while (w.pendingEvents.length > 0) {
-    const ev = w.pendingEvents.shift();
-    // Smart choice: prefer options that reduce pressure/grievance
-    let bestIdx = 0, bestScore = -999;
-    ev.choices.forEach((ch, i) => {
-      const c = ch.cons; let s = 0;
-      if (c.pressure === 0) s += 30;
-      if (c.leg > 0) s += c.leg;
-      if (c.griev < 0) s += 20;
-      if (c.allToFood) s += 15;
-      if (c.morale) s += 10;
-      if (c.reform) s += 15;
-      if (s > bestScore) { bestScore = s; bestIdx = i; }
-    });
-    resolveEvent(w, ev, bestIdx);
-    w.metrics.totalDecisions++;
-  }
-  return w;
-}
-
-// Get state for UI
 function getState(w) {
   const ac = aliveCitizens(w);
   const actions = {};
@@ -511,14 +550,19 @@ function getState(w) {
   return {
     turn: w.turn, year: w.year, season: w.season, archetype: w.archetype,
     alive: ac.length, hungry: ac.filter(c => c.hunger > 60).length,
-    chief: { name: w.chief.name, age: w.chief.age, era: w.chief.era, pressure: w.chief.pressure, legitimacy: w.chief.legitimacy, reforms: w.chief.reforms.length },
-    settlement: { name: w.settlement.name, meat: w.settlement.meat, berries: w.settlement.berries, fish: w.settlement.fish, wood: w.settlement.wood, huts: w.settlement.huts },
-    factions: w.factions.map(f => ({ name: f.name, power: f.power, grievance: f.grievance, reason: f.grievanceReason })),
+    chief: { name:w.chief.name, age:w.chief.age, era:w.chief.era, pressure:w.chief.pressure, legitimacy:w.chief.legitimacy, reforms:w.chief.reforms.length },
+    settlement: { name:w.settlement.name, meat:w.settlement.meat, berries:w.settlement.berries, fish:w.settlement.fish, wood:w.settlement.wood, huts:w.settlement.huts },
+    factions: w.factions.map(f => ({ name:f.name, power:f.power, grievance:f.grievance, reason:f.grievanceReason })),
     actions: actions,
-    chronicle: w.chronicle.slice(-10).reverse(),
+    chronicle: w.chronicle.slice(-8).reverse(),
     resolved: w.resolvedEvents.slice(-5).reverse(),
+    pendingEvents: w.pendingEvents.map(e => ({ id:e.id, title:e.title, text:e.text, priority:e.priority, choices:e.choices, timer:e.timer||15 })),
     metrics: w.metrics,
-    citizens: ac.slice(0, 60).map(c => ({ x: c.x, z: c.z, action: c.action, hunger: c.hunger, age: c.age })),
+    citizens: ac.slice(0, 60).map(c => ({ x:c.x, z:c.z, action:c.action, hunger:c.hunger, age:c.age, carrying:!!c.carrying })),
     gameOver: ac.length === 0,
+    seasonProgress: w.seasonProgress,
+    paused: w.paused,
+    speed: w.speed,
+    priorities: w.priorities,
   };
 }

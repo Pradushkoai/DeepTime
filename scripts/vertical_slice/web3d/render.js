@@ -1,171 +1,204 @@
 // ============================================================================
-// DeepTime 3D — Three.js Renderer
+// DeepTime 3D — Three.js Real-Time Renderer v2.0
 // ============================================================================
 
 let scene, camera, renderer, controls;
-let ground, fire, fireLight;
+let ground, fire, fireLight, fireGlow;
 let citizenMeshes = [];
-let hutMeshes = [];
-let treeMeshes = [];
+let hutGroup, treeGroup;
+let poiLabels = [];
+let particleSystems = [];
+let lastTime = performance.now();
 
 const SEASON_COLORS = {
-  SPRING: { ground: 0x4a7a3a, sky: 0x6a9a5a, fog: 0x8aba6a },
-  SUMMER: { ground: 0x5a8a2a, sky: 0x4a8aca, fog: 0x9aca7a },
-  AUTUMN: { ground: 0x7a5a2a, sky: 0xca8a4a, fog: 0xba9a5a },
-  WINTER: { ground: 0x9a9aaa, sky: 0x6a7a9a, fog: 0xaaaaBB },
+  SPRING: { ground:0x4a7a3a, sky:0x6a9a5a, fog:0x8aba6a, tree:0x2a6a2a },
+  SUMMER: { ground:0x5a8a2a, sky:0x4a8aca, fog:0x9aca7a, tree:0x2a5a1a },
+  AUTUMN: { ground:0x7a5a2a, sky:0xca8a4a, fog:0xba9a5a, tree:0x8a5a2a },
+  WINTER: { ground:0x9a9aaa, sky:0x6a7a9a, fog:0xaaaaBB, tree:0x3a4a3a },
 };
 
 const ACTION_COLORS = {
-  HUNT: 0xf04848, GATHER: 0x4ec9b0, FISH: 0x569cd6,
-  BUILD: 0xdcdcaa, REST: 0x888888, RITUAL: 0xc586c0, IDLE: 0x666666,
+  HUNT:0xf04848, GATHER:0x4ec9b0, FISH:0x569cd6,
+  BUILD:0xdcdcaa, REST:0x888888, RITUAL:0xc586c0, IDLE:0x666666,
+  EAT:0xffaa00, CARRY:0xff8800,
 };
+
+const POI_DATA = [
+  { x:0, z:0, type:'fire', label:'🔥', color:0xff6600 },
+  { x:-10, z:-8, type:'forest', label:'🌲', color:0x2a5a2a },
+  { x:10, z:-6, type:'river', label:'🏞️', color:0x4488cc },
+  { x:-8, z:8, type:'gather', label:'🍓', color:0x88aa44 },
+  { x:4, z:6, type:'build', label:'🏗️', color:0x886644 },
+  { x:6, z:-4, type:'huts', label:'🏠', color:0x664433 },
+  { x:-4, z:4, type:'storage', label:'📦', color:0x665544 },
+];
 
 function initThree() {
   scene = new THREE.Scene();
-  const colors = SEASON_COLORS.SUMMER;
-  scene.background = new THREE.Color(colors.sky);
-  scene.fog = new THREE.Fog(colors.fog, 30, 120);
+  const c = SEASON_COLORS.SUMMER;
+  scene.background = new THREE.Color(c.sky);
+  scene.fog = new THREE.Fog(c.fog, 25, 100);
 
-  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
-  camera.position.set(25, 18, 25);
+  camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 200);
+  camera.position.set(18, 14, 18);
   camera.lookAt(0, 0, 0);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true, canvas: document.getElementById('canvas3d') });
+  renderer = new THREE.WebGLRenderer({ antialias:true, canvas:document.getElementById('canvas3d') });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-  // OrbitControls
   if (typeof THREE.OrbitControls !== 'undefined') {
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.minDistance = 10;
-    controls.maxDistance = 60;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 8;
+    controls.maxDistance = 50;
     controls.maxPolarAngle = Math.PI / 2.1;
+    controls.target.set(0, 0, 0);
   }
 
   // Lights
-  const ambient = new THREE.AmbientLight(0x666666, 0.6);
-  scene.add(ambient);
-
-  const sun = new THREE.DirectionalLight(0xffffff, 0.8);
-  sun.position.set(20, 30, 10);
+  scene.add(new THREE.AmbientLight(0x666677, 0.5));
+  const sun = new THREE.DirectionalLight(0xffeedd, 0.8);
+  sun.position.set(15, 25, 8);
   sun.castShadow = true;
-  sun.shadow.mapSize.width = 1024;
-  sun.shadow.mapSize.height = 1024;
+  sun.shadow.mapSize.width = 2048;
+  sun.shadow.mapSize.height = 2048;
   sun.shadow.camera.near = 0.5;
-  sun.shadow.camera.far = 80;
-  sun.shadow.camera.left = -30;
-  sun.shadow.camera.right = 30;
-  sun.shadow.camera.top = 30;
-  sun.shadow.camera.bottom = -30;
+  sun.shadow.camera.far = 60;
+  sun.shadow.camera.left = -20;
+  sun.shadow.camera.right = 20;
+  sun.shadow.camera.top = 20;
+  sun.shadow.camera.bottom = -20;
   scene.add(sun);
 
-  // Fire light
-  fireLight = new THREE.PointLight(0xff6600, 1.5, 20);
+  fireLight = new THREE.PointLight(0xff6600, 2, 18);
   fireLight.position.set(0, 1.5, 0);
   scene.add(fireLight);
 
   // Ground
-  const groundGeo = new THREE.PlaneGeometry(40, 40);
-  const groundMat = new THREE.MeshLambertMaterial({ color: colors.ground });
-  ground = new THREE.Mesh(groundGeo, groundMat);
-  ground.rotation.x = -Math.PI / 2;
+  const gGeo = new THREE.PlaneGeometry(40, 40, 20, 20);
+  const gMat = new THREE.MeshLambertMaterial({ color:c.ground });
+  ground = new THREE.Mesh(gGeo, gMat);
+  ground.rotation.x = -Math.PI/2;
   ground.receiveShadow = true;
   scene.add(ground);
 
   // Fire pit
   const pitGeo = new THREE.CircleGeometry(1.2, 16);
-  const pitMat = new THREE.MeshLambertMaterial({ color: 0x2a1a0a });
+  const pitMat = new THREE.MeshLambertMaterial({ color:0x2a1a0a });
   const pit = new THREE.Mesh(pitGeo, pitMat);
-  pit.rotation.x = -Math.PI / 2;
+  pit.rotation.x = -Math.PI/2;
   pit.position.y = 0.02;
   scene.add(pit);
 
-  // Fire flames
-  const fireGeo = new THREE.ConeGeometry(0.6, 1.5, 6);
-  const fireMat = new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.9 });
-  fire = new THREE.Mesh(fireGeo, fireMat);
+  // Fire
+  const fGeo = new THREE.ConeGeometry(0.5, 1.5, 6);
+  const fMat = new THREE.MeshBasicMaterial({ color:0xff6600, transparent:true, opacity:0.9 });
+  fire = new THREE.Mesh(fGeo, fMat);
   fire.position.set(0, 0.75, 0);
   scene.add(fire);
 
-  // Fire glow
-  const glowGeo = new THREE.ConeGeometry(0.9, 2.2, 6);
-  const glowMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.3 });
-  const glow = new THREE.Mesh(glowGeo, glowMat);
-  glow.position.set(0, 1.0, 0);
-  scene.add(glow);
-  fire.userData.glow = glow;
+  const fgGeo = new THREE.ConeGeometry(0.8, 2.2, 6);
+  const fgMat = new THREE.MeshBasicMaterial({ color:0xffaa00, transparent:true, opacity:0.25 });
+  fireGlow = new THREE.Mesh(fgGeo, fgMat);
+  fireGlow.position.set(0, 1.0, 0);
+  scene.add(fireGlow);
 
-  // Trees
+  // Create POI markers
+  createPOIMarkers();
+
+  // Trees & huts
+  treeGroup = new THREE.Group();
+  scene.add(treeGroup);
   createTrees();
 
-  // Huts
+  hutGroup = new THREE.Group();
+  scene.add(hutGroup);
   createHuts(5);
 
   window.addEventListener('resize', onResize);
   animate();
 }
 
+function createPOIMarkers() {
+  for (const poi of POI_DATA) {
+    if (poi.type === 'fire') continue; // fire is already there
+
+    // Marker: small colored circle on ground
+    const mGeo = new THREE.RingGeometry(1.0, 1.3, 16);
+    const mMat = new THREE.MeshBasicMaterial({ color:poi.color, transparent:true, opacity:0.4, side:THREE.DoubleSide });
+    const marker = new THREE.Mesh(mGeo, mMat);
+    marker.rotation.x = -Math.PI/2;
+    marker.position.set(poi.x, 0.05, poi.z);
+    scene.add(marker);
+
+    // Label sprite
+    const canvas = document.createElement('canvas');
+    canvas.width = 128; canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.font = '40px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(poi.label, 64, 45);
+    const tex = new THREE.CanvasTexture(canvas);
+    const sprMat = new THREE.SpriteMaterial({ map:tex, transparent:true });
+    const spr = new THREE.Sprite(sprMat);
+    spr.position.set(poi.x, 3, poi.z);
+    spr.scale.set(2, 1, 1);
+    scene.add(spr);
+    poiLabels.push(spr);
+  }
+}
+
 function createTrees() {
-  for (const t of treeMeshes) scene.remove(t);
-  treeMeshes = [];
+  while (treeGroup.children.length > 0) treeGroup.remove(treeGroup.children[0]);
   const rng = new RNG(42);
-  for (let i = 0; i < 18; i++) {
-    const angle = (i / 18) * Math.PI * 2;
-    const dist = 12 + rng.random() * 5;
+  for (let i = 0; i < 20; i++) {
+    const angle = (i/20) * Math.PI * 2;
+    const dist = 13 + rng.random() * 5;
     const x = Math.cos(angle) * dist;
     const z = Math.sin(angle) * dist;
 
-    // Trunk
-    const trunkGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.5, 6);
-    const trunkMat = new THREE.MeshLambertMaterial({ color: 0x3d2b1f });
-    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+    const tGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.5, 6);
+    const tMat = new THREE.MeshLambertMaterial({ color:0x3d2b1f });
+    const trunk = new THREE.Mesh(tGeo, tMat);
     trunk.position.set(x, 0.75, z);
     trunk.castShadow = true;
-    scene.add(trunk);
-    treeMeshes.push(trunk);
+    treeGroup.add(trunk);
 
-    // Foliage
-    const folGeo = new THREE.ConeGeometry(1.2, 2.5, 6);
-    const folMat = new THREE.MeshLambertMaterial({ color: 0x2a5a2a });
-    const fol = new THREE.Mesh(folGeo, folMat);
+    const fGeo = new THREE.ConeGeometry(1.2, 2.5, 6);
+    const fMat = new THREE.MeshLambertMaterial({ color:0x2a5a2a });
+    const fol = new THREE.Mesh(fGeo, fMat);
     fol.position.set(x, 2.5, z);
     fol.castShadow = true;
-    scene.add(fol);
-    treeMeshes.push(fol);
+    treeGroup.add(fol);
   }
 }
 
 function createHuts(count) {
-  for (const h of hutMeshes) scene.remove(h);
-  hutMeshes = [];
+  while (hutGroup.children.length > 0) hutGroup.remove(hutGroup.children[0]);
   const rng = new RNG(100);
   for (let i = 0; i < Math.min(count, 8); i++) {
-    const angle = (i / 8) * Math.PI * 2 + rng.random() * 0.3;
+    const angle = (i/8) * Math.PI * 2 + rng.random() * 0.3;
     const dist = 4 + rng.random() * 3;
     const x = Math.cos(angle) * dist;
     const z = Math.sin(angle) * dist;
 
-    // Hut base
-    const baseGeo = new THREE.CylinderGeometry(1, 1.2, 1, 6);
-    const baseMat = new THREE.MeshLambertMaterial({ color: 0x5a4a3a });
-    const base = new THREE.Mesh(baseGeo, baseMat);
+    const bGeo = new THREE.CylinderGeometry(1, 1.2, 1, 6);
+    const bMat = new THREE.MeshLambertMaterial({ color:0x5a4a3a });
+    const base = new THREE.Mesh(bGeo, bMat);
     base.position.set(x, 0.5, z);
     base.castShadow = true;
-    scene.add(base);
-    hutMeshes.push(base);
+    hutGroup.add(base);
 
-    // Roof
-    const roofGeo = new THREE.ConeGeometry(1.3, 1.2, 6);
-    const roofMat = new THREE.MeshLambertMaterial({ color: 0x4a3a2a });
-    const roof = new THREE.Mesh(roofGeo, roofMat);
+    const rGeo = new THREE.ConeGeometry(1.3, 1.2, 6);
+    const rMat = new THREE.MeshLambertMaterial({ color:0x4a3a2a });
+    const roof = new THREE.Mesh(rGeo, rMat);
     roof.position.set(x, 1.6, z);
     roof.castShadow = true;
-    scene.add(roof);
-    hutMeshes.push(roof);
+    hutGroup.add(roof);
   }
 }
 
@@ -175,26 +208,34 @@ function updateCitizens(citizens) {
   citizenMeshes = [];
 
   for (const c of citizens) {
-    const x = (c.x - 0.5) * 16;
-    const z = (c.z - 0.5) * 16;
     const color = ACTION_COLORS[c.action] || 0xaaaaaa;
 
-    // Body
-    const bodyGeo = new THREE.SphereGeometry(0.3, 8, 6);
-    const bodyMat = new THREE.MeshLambertMaterial({ color: color, emissive: color, emissiveIntensity: 0.3 });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.set(x, 0.4, z);
+    // Body — capsule (sphere)
+    const bGeo = new THREE.SphereGeometry(0.25, 8, 6);
+    const bMat = new THREE.MeshLambertMaterial({ color, emissive:color, emissiveIntensity:0.3 });
+    const body = new THREE.Mesh(bGeo, bMat);
+    body.position.set(c.x, 0.35, c.z);
     body.castShadow = true;
     scene.add(body);
     citizenMeshes.push(body);
 
-    // Hunger indicator
+    // Carrying indicator
+    if (c.carrying) {
+      const carGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+      const carMat = new THREE.MeshBasicMaterial({ color:0xffaa00 });
+      const car = new THREE.Mesh(carGeo, carMat);
+      car.position.set(c.x, 0.7, c.z);
+      scene.add(car);
+      citizenMeshes.push(car);
+    }
+
+    // Hunger ring
     if (c.hunger > 60) {
-      const ringGeo = new THREE.TorusGeometry(0.5, 0.05, 4, 12);
-      const ringMat = new THREE.MeshBasicMaterial({ color: 0xf85149, transparent: true, opacity: 0.6 });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.position.set(x, 0.4, z);
-      ring.rotation.x = Math.PI / 2;
+      const rGeo = new THREE.TorusGeometry(0.45, 0.04, 4, 12);
+      const rMat = new THREE.MeshBasicMaterial({ color:0xf85149, transparent:true, opacity:0.5 });
+      const ring = new THREE.Mesh(rGeo, rMat);
+      ring.position.set(c.x, 0.35, c.z);
+      ring.rotation.x = Math.PI/2;
       scene.add(ring);
       citizenMeshes.push(ring);
     }
@@ -202,49 +243,62 @@ function updateCitizens(citizens) {
 }
 
 function updateSeason(season) {
-  const colors = SEASON_COLORS[season] || SEASON_COLORS.SUMMER;
-  scene.background = new THREE.Color(colors.sky);
-  scene.fog.color = new THREE.Color(colors.fog);
-  ground.material.color = new THREE.Color(colors.ground);
+  const c = SEASON_COLORS[season] || SEASON_COLORS.SUMMER;
+  scene.background = new THREE.Color(c.sky);
+  scene.fog.color = new THREE.Color(c.fog);
+  ground.material.color = new THREE.Color(c.ground);
 
-  // Update tree colors
-  for (let i = 1; i < treeMeshes.length; i += 2) {
-    if (treeMeshes[i] && treeMeshes[i].material) {
-      treeMeshes[i].material.color = new THREE.Color(season === 'WINTER' ? 0x3a4a3a : season === 'AUTUMN' ? 0x7a5a2a : 0x2a5a2a);
+  for (const child of treeGroup.children) {
+    if (child.geometry && child.geometry.type === 'ConeGeometry') {
+      child.material.color = new THREE.Color(c.tree);
     }
   }
 
-  // Fire intensity
   if (season === 'WINTER') {
     fire.scale.set(1.3, 1.3, 1.3);
-    fireLight.intensity = 2.0;
+    fireLight.intensity = 2.5;
   } else {
     fire.scale.set(1, 1, 1);
-    fireLight.intensity = 1.5;
+    fireLight.intensity = 2.0;
   }
 }
 
 let animTime = 0;
 function animate() {
   requestAnimationFrame(animate);
-  animTime += 0.05;
+  const now = performance.now();
+  const dt = Math.min((now - lastTime) / 1000, 0.1);
+  lastTime = now;
+
+  // Update simulation
+  if (WORLD) {
+    updateRealTime(WORLD, dt);
+    // Update UI every ~200ms
+    if (Math.floor(animTime * 5) !== Math.floor((animTime + dt) * 5)) {
+      updateUI();
+    }
+    // Update 3D positions every frame
+    const s = getState(WORLD);
+    updateSeason(s.season);
+    updateCitizens(s.citizens);
+  }
+
+  animTime += dt;
 
   // Animate fire
   if (fire) {
-    fire.scale.y = 1 + Math.sin(animTime * 3) * 0.2;
-    fire.rotation.y = animTime;
-    if (fire.userData.glow) {
-      fire.userData.glow.scale.y = 1 + Math.sin(animTime * 2) * 0.15;
-      fire.userData.glow.rotation.y = -animTime * 0.7;
-    }
-    fireLight.intensity = 1.5 + Math.sin(animTime * 4) * 0.3;
+    fire.scale.y = 1 + Math.sin(animTime * 4) * 0.2;
+    fire.rotation.y = animTime * 2;
+    fireGlow.scale.y = 1 + Math.sin(animTime * 3) * 0.15;
+    fireGlow.rotation.y = -animTime * 1.5;
+    fireLight.intensity = 2.0 + Math.sin(animTime * 5) * 0.4;
   }
 
-  // Animate citizens (bobbing)
+  // Bobbing citizens
   for (let i = 0; i < citizenMeshes.length; i++) {
     const m = citizenMeshes[i];
     if (m && m.geometry && m.geometry.type === 'SphereGeometry') {
-      m.position.y = 0.4 + Math.sin(animTime * 2 + i) * 0.1;
+      m.position.y = 0.35 + Math.sin(animTime * 3 + i * 0.5) * 0.08;
     }
   }
 

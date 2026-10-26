@@ -1,8 +1,8 @@
 // ============================================================================
-// DeepTime 3D — UI Controller
+// DeepTime 3D — UI Controller v2.0 (Real-Time)
 // ============================================================================
 
-let config = { archetype: 'FOREST', seed: 42, population: 50, strategy: 'smart' };
+let config = { archetype:'FOREST', seed:42, population:50, strategy:'smart' };
 
 function start() {
   WORLD = initWorld(config.archetype, config.population, config.seed);
@@ -10,16 +10,26 @@ function start() {
   updateUI();
 }
 
-function nextTurn() {
-  simulateTurn(WORLD);
+function togglePause() {
+  WORLD.paused = !WORLD.paused;
   updateUI();
 }
 
-function autoPlay(n) {
-  for (let i = 0; i < n; i++) {
-    simulateTurn(WORLD);
-    if (aliveCitizens(WORLD).length === 0) break;
-  }
+function setSpeed(s) {
+  WORLD.speed = s;
+  updateUI();
+}
+
+function setPriority(name, val) {
+  WORLD.priorities[name] = parseInt(val);
+}
+
+function resolveEventUI(evId, choiceIdx) {
+  const ev = WORLD.pendingEvents.find(e => e.id === evId);
+  if (!ev) return;
+  resolveEvent(WORLD, ev, choiceIdx);
+  WORLD.pendingEvents = WORLD.pendingEvents.filter(e => e.id !== evId);
+  WORLD.metrics.totalDecisions++;
   updateUI();
 }
 
@@ -32,31 +42,36 @@ function resetGame() {
 }
 
 function updateUI() {
+  if (!WORLD) return;
   const s = getState(WORLD);
 
-  // Season
-  const seasonIcons = { SPRING: '🌱 ВЕСНА', SUMMER: '☀️ ЛЕТО', AUTUMN: '🍂 ОСЕНЬ', WINTER: '❄️ ЗИМА' };
-  document.getElementById('seasonLabel').textContent = seasonIcons[s.season] || s.season;
+  const sIcons = { SPRING:'🌱 ВЕСНА', SUMMER:'☀️ ЛЕТО', AUTUMN:'🍂 ОСЕНЬ', WINTER:'❄️ ЗИМА' };
+  document.getElementById('seasonLabel').textContent = sIcons[s.season] || s.season;
   document.getElementById('yearLabel').textContent = `${s.year} до н.э.`;
   document.getElementById('turnLabel').textContent = `Ход ${s.turn}`;
   document.getElementById('popLabel').textContent = `👥 ${s.alive}`;
-  if (s.hungry > 0) {
-    document.getElementById('hungryLabel').textContent = `🍗 голод: ${s.hungry}`;
-    document.getElementById('hungryLabel').style.display = 'inline';
-  } else {
-    document.getElementById('hungryLabel').style.display = 'none';
-  }
+  document.getElementById('hungryLabel').style.display = s.hungry > 0 ? 'inline' : 'none';
+  document.getElementById('hungryLabel').textContent = `🍗 ${s.hungry}`;
+
+  // Season progress bar
+  document.getElementById('seasonBar').style.width = (s.seasonProgress * 100) + '%';
+
+  // Pause/speed buttons
+  document.getElementById('btnPause').textContent = s.paused ? '▶ Пуск' : '⏸ Пауза';
+  document.getElementById('btn1x').style.opacity = s.speed === 1 ? '1' : '0.5';
+  document.getElementById('btn2x').style.opacity = s.speed === 2 ? '1' : '0.5';
+  document.getElementById('btn3x').style.opacity = s.speed === 3 ? '1' : '0.5';
 
   // Chief
-  const chief = s.chief;
-  document.getElementById('chiefName').textContent = chief.name;
-  document.getElementById('chiefAge').textContent = `${chief.age} / ${chief.era}`;
-  document.getElementById('chiefLegit').textContent = `${chief.legitimacy}/100`;
+  const ch = s.chief;
+  document.getElementById('chiefName').textContent = ch.name;
+  document.getElementById('chiefAge').textContent = `${ch.age} / ${ch.era}`;
+  document.getElementById('chiefLegit').textContent = `${ch.legitimacy}/100`;
   const pEl = document.getElementById('chiefPress');
-  pEl.textContent = `${chief.pressure}/100`;
-  pEl.className = `val ${chief.pressure > 80 ? 'bad' : chief.pressure > 50 ? 'warn' : 'good'}`;
-  document.getElementById('pressBar').style.width = chief.pressure + '%';
-  document.getElementById('chiefReforms').textContent = chief.reforms;
+  pEl.textContent = `${ch.pressure}/100`;
+  pEl.className = `val ${ch.pressure > 80 ? 'bad' : ch.pressure > 50 ? 'warn' : 'good'}`;
+  document.getElementById('pressBar').style.width = ch.pressure + '%';
+  document.getElementById('chiefReforms').textContent = ch.reforms;
 
   // Resources
   document.getElementById('resMeat').textContent = s.settlement.meat;
@@ -66,34 +81,30 @@ function updateUI() {
 
   // Actions
   let actHtml = '';
-  const actColors = { HUNT:'#f04848', GATHER:'#4ec9b0', FISH:'#569cd6', BUILD:'#dcdcaa', REST:'#888', RITUAL:'#c586c0', IDLE:'#666' };
-  for (const [a, c] of Object.entries(s.actions)) {
-    actHtml += `<span class="actTag" style="background:${actColors[a]||'#444'}22;color:${actColors[a]||'#aaa'};border:1px solid ${actColors[a]||'#555'}">${a}: ${c}</span>`;
+  const aColors = { HUNT:'#f04848',GATHER:'#4ec9b0',FISH:'#569cd6',BUILD:'#dcdcaa',REST:'#888',RITUAL:'#c586c0',IDLE:'#666',EAT:'#ffaa00',CARRY:'#ff8800' };
+  for (const [a,c] of Object.entries(s.actions)) {
+    actHtml += `<span class="actTag" style="background:${aColors[a]||'#444'}22;color:${aColors[a]||'#aaa'};border:1px solid ${aColors[a]||'#555'}">${a}: ${c}</span>`;
   }
   document.getElementById('actTags').innerHTML = actHtml;
 
   // Factions
-  let facHtml = '';
+  let fHtml = '';
   for (const f of s.factions) {
     const emoji = f.grievance < 60 ? '✅' : f.grievance < 90 ? '⚠️' : '🔥';
-    facHtml += `<div class="fac"><span class="facN">${emoji} ${f.name}</span> <span class="facP">(сила ${f.power})</span>`;
-    facHtml += `<div class="facG">Обида: ${f.grievance}/100</div>`;
-    facHtml += `<div class="bar"><div class="barFill griev" style="width:${f.grievance}%"></div></div></div>`;
+    fHtml += `<div class="fac"><span class="facN">${emoji} ${f.name}</span> <span class="facP">(сила ${f.power})</span>`;
+    fHtml += `<div class="facG">Обида: ${f.grievance}/100</div>`;
+    fHtml += `<div class="bar"><div class="barFill griev" style="width:${f.grievance}%"></div></div></div>`;
   }
-  document.getElementById('factions').innerHTML = facHtml;
+  document.getElementById('factions').innerHTML = fHtml;
 
   // Chronicle
-  let chHtml = '';
-  for (const e of s.chronicle) {
-    chHtml += `<div class="chEntry"><span class="chY">[${e.year} ${e.season}]</span> ${e.entry}</div>`;
-  }
-  document.getElementById('chronicle').innerHTML = chHtml || '<div class="chEntry" style="color:#555">Хроника пуста</div>';
+  let cHtml = '';
+  for (const e of s.chronicle) cHtml += `<div class="chEntry"><span class="chY">[${e.year} ${e.season}]</span> ${e.entry}</div>`;
+  document.getElementById('chronicle').innerHTML = cHtml || '<div class="chEntry" style="color:#555">Хроника пуста</div>';
 
-  // Recent decisions
+  // Recent
   let rHtml = '';
-  for (const e of s.resolved) {
-    rHtml += `<div class="chEntry"><span class="chY">[${e.turn}]</span> ${e.title} → <b style="color:#4ec9b0">${e.choice}</b></div>`;
-  }
+  for (const e of s.resolved) rHtml += `<div class="chEntry"><span class="chY">[${e.turn}]</span> ${e.title} → <b style="color:#4ec9b0">${e.choice}</b></div>`;
   document.getElementById('recentDec').innerHTML = rHtml || '<div class="chEntry" style="color:#555">Пока нет решений</div>';
 
   // Metrics
@@ -102,11 +113,31 @@ function updateUI() {
   document.getElementById('mWinters').textContent = s.metrics.wintersSurvived;
   document.getElementById('mPressure').textContent = s.metrics.maxPressure;
 
-  // 3D update
-  if (scene) {
-    updateSeason(s.season);
-    updateCitizens(s.citizens);
-    createHuts(s.settlement.huts);
+  // Priorities (sliders)
+  if (!document.getElementById('priFood').dataset.init) {
+    document.getElementById('priFood').value = s.priorities.food;
+    document.getElementById('priStock').value = s.priorities.stockpile;
+    document.getElementById('priBuild').value = s.priorities.build;
+    document.getElementById('priFood').dataset.init = '1';
+  }
+
+  // Events popup
+  if (s.pendingEvents.length > 0) {
+    const ev = s.pendingEvents[0];
+    const popup = document.getElementById('eventPopup');
+    popup.style.display = 'block';
+    popup.className = `eventPopup ${ev.priority.toLowerCase()}`;
+    let html = `<div class="evTitle">${ev.title}</div>`;
+    html += `<div class="evText">${ev.text}</div>`;
+    html += `<div class="evTimer">Авто-решение через ${Math.ceil(ev.timer)}с</div>`;
+    html += '<div class="evChoices">';
+    ev.choices.forEach((ch, i) => {
+      html += `<button class="evChoice" onclick="resolveEventUI(${ev.id}, ${i})"><b>${ch.label}</b><br><small>${ch.desc}</small></button>`;
+    });
+    html += '</div>';
+    popup.innerHTML = html;
+  } else {
+    document.getElementById('eventPopup').style.display = 'none';
   }
 
   // Game over
