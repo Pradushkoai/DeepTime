@@ -129,8 +129,21 @@ function aliveCitizens(w) { return w.citizens.filter(c => c.alive); }
 // ============================================================================
 
 function updateRealTime(w, dt) {
-  if (w.paused) return;
-  dt *= w.speed; // apply speed multiplier
+  // Event timers always tick (even when paused, at reduced speed)
+  for (let i = w.pendingEvents.length - 1; i >= 0; i--) {
+    const ev = w.pendingEvents[i];
+    const timerDt = w.paused ? dt * 0.3 : dt;
+    ev.timer = (ev.timer || 30) - timerDt;
+    if (ev.timer <= 0) {
+      const idx = smartChoice(w, ev);
+      resolveEvent(w, ev, idx);
+      w.pendingEvents.splice(i, 1);
+      w.metrics.totalDecisions++;
+    }
+  }
+
+  if (w.paused) return; // Stop simulation when paused
+  dt *= w.speed;
 
   w.simTime += dt;
   w.seasonProgress += dt / w.seasonDuration;
@@ -163,20 +176,6 @@ function updateRealTime(w, dt) {
     // Keep within bounds
     a.x = Math.max(-14, Math.min(14, a.x));
     a.z = Math.max(-14, Math.min(14, a.z));
-  }
-
-  // Process pending events (non-blocking: they're shown as popups by UI)
-  // Auto-resolve after 10 seconds if player doesn't choose
-  for (let i = w.pendingEvents.length - 1; i >= 0; i--) {
-    const ev = w.pendingEvents[i];
-    ev.timer = (ev.timer || 15) - dt;
-    if (ev.timer <= 0) {
-      // Auto-resolve with smart choice
-      const idx = smartChoice(w, ev);
-      resolveEvent(w, ev, idx);
-      w.pendingEvents.splice(i, 1);
-      w.metrics.totalDecisions++;
-    }
   }
 }
 
@@ -447,7 +446,7 @@ function runSeasonTick(w) {
 
 function fireEvent(w, type, priority) {
   if (w.pendingEvents.find(e => e.type === type)) return; // no duplicates
-  const ev = { id: w.nextEventId++, type, priority, turn: w.turn, timer: 15 };
+  const ev = { id: w.nextEventId++, type, priority, turn: w.turn, timer: 30 };
   buildEvent(w, ev);
   w.pendingEvents.push(ev);
 }
@@ -535,7 +534,7 @@ function checkEvents(w) {
   const hungry = aliveCitizens(w).filter(c => c.hunger > 70).length;
   if (hungry >= 5) fireEvent(w, 'HUNGER', 'CRITICAL');
   for (const f of w.factions) {
-    if (f.grievance > 90) { const ev = {id:w.nextEventId++,type:'FACTION_GRIEVANCE',priority:'HIGH',turn:w.turn,timer:15,faction:f}; buildEvent(w,ev); w.pendingEvents.push(ev); }
+    if (f.grievance > 90) { const ev = {id:w.nextEventId++,type:'FACTION_GRIEVANCE',priority:'HIGH',turn:w.turn,timer:30,faction:f}; buildEvent(w,ev); w.pendingEvents.push(ev); }
   }
   if (w.rng.random() < 0.10) fireEvent(w, 'CHAMPION_PROPOSES', 'NORMAL');
   if (w.season === 'WINTER' && w.rng.random() < 0.5) fireEvent(w, 'RITUAL_OF_YEAR', 'NORMAL');
@@ -613,7 +612,7 @@ function getState(w) {
     actions: actions,
     chronicle: w.chronicle.slice(-8).reverse(),
     resolved: w.resolvedEvents.slice(-5).reverse(),
-    pendingEvents: w.pendingEvents.map(e => ({ id:e.id, title:e.title, text:e.text, priority:e.priority, choices:e.choices, timer:e.timer||15 })),
+    pendingEvents: w.pendingEvents.map(e => ({ id:e.id, title:e.title, text:e.text, priority:e.priority, choices:e.choices, timer:e.timer||30 })),
     metrics: w.metrics,
     citizens: ac.slice(0, 60).map(c => ({ x:c.x, z:c.z, action:c.action, hunger:c.hunger, age:c.age, carrying:!!c.carrying })),
     animals: w.animals.filter(a => a.alive).map(a => ({ x:a.x, z:a.z })),

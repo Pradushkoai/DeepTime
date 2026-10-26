@@ -125,19 +125,39 @@ function updateUI() {
   if (s.pendingEvents.length > 0) {
     const ev = s.pendingEvents[0];
     const popup = document.getElementById('eventPopup');
-    popup.style.display = 'block';
-    popup.className = `eventPopup ${ev.priority.toLowerCase()}`;
-    let html = `<div class="evTitle">${ev.title}</div>`;
-    html += `<div class="evText">${ev.text}</div>`;
-    html += `<div class="evTimer">Авто-решение через ${Math.ceil(ev.timer)}с</div>`;
-    html += '<div class="evChoices">';
-    ev.choices.forEach((ch, i) => {
-      html += `<button class="evChoice" onclick="resolveEventUI(${ev.id}, ${i})"><b>${ch.label}</b><br><small>${ch.desc}</small></button>`;
-    });
-    html += '</div>';
-    popup.innerHTML = html;
+    // Only rebuild if event changed (avoid killing clicks)
+    if (popup.dataset.evId !== String(ev.id)) {
+      popup.style.display = 'block';
+      popup.className = `eventPopup ${ev.priority.toLowerCase()}`;
+      let html = `<div class="evTitle">${ev.title}</div>`;
+      html += `<div class="evText">${ev.text}</div>`;
+      html += `<div class="evTimer" id="evTimer">Авто-решение через ${Math.ceil(ev.timer)}с</div>`;
+      html += '<div class="evChoices">';
+      ev.choices.forEach((ch, i) => {
+        html += `<button class="evChoice" onclick="resolveEventUI(${ev.id}, ${i})"><b>${ch.label}</b><br><small>${ch.desc}</small></button>`;
+      });
+      html += '</div>';
+      popup.innerHTML = html;
+      popup.dataset.evId = ev.id;
+      // Auto-pause when new event appears
+      if (!WORLD.paused) {
+        WORLD.paused = true;
+        WORLD._wasPausedByEvent = true;
+      }
+    } else {
+      // Just update timer
+      const timerEl = document.getElementById('evTimer');
+      if (timerEl) timerEl.textContent = `Авто-решение через ${Math.ceil(ev.timer)}с`;
+    }
   } else {
-    document.getElementById('eventPopup').style.display = 'none';
+    const popup = document.getElementById('eventPopup');
+    popup.style.display = 'none';
+    popup.dataset.evId = '';
+    // Auto-unpause if was paused by event
+    if (WORLD._wasPausedByEvent) {
+      WORLD.paused = false;
+      WORLD._wasPausedByEvent = false;
+    }
   }
 
   // Game over
