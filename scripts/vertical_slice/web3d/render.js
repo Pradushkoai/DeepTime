@@ -5,6 +5,7 @@
 let scene, camera, renderer, controls;
 let ground, fire, fireLight, fireGlow;
 let citizenMeshes = [];
+let animalMeshes = [];
 let hutGroup, treeGroup;
 let poiLabels = [];
 let particleSystems = [];
@@ -202,15 +203,15 @@ function createHuts(count) {
   }
 }
 
-function updateCitizens(citizens) {
-  // Remove old
+function updateCitizens(citizens, animals) {
+  // Remove old citizens
   for (const m of citizenMeshes) scene.remove(m);
   citizenMeshes = [];
 
   for (const c of citizens) {
     const color = ACTION_COLORS[c.action] || 0xaaaaaa;
 
-    // Body — capsule (sphere)
+    // Body
     const bGeo = new THREE.SphereGeometry(0.25, 8, 6);
     const bMat = new THREE.MeshLambertMaterial({ color, emissive:color, emissiveIntensity:0.3 });
     const body = new THREE.Mesh(bGeo, bMat);
@@ -238,6 +239,44 @@ function updateCitizens(citizens) {
       ring.rotation.x = Math.PI/2;
       scene.add(ring);
       citizenMeshes.push(ring);
+    }
+  }
+
+  // Remove old animals
+  for (const m of animalMeshes) scene.remove(m);
+  animalMeshes = [];
+
+  if (animals) {
+    for (const a of animals) {
+      // Deer body (elongated sphere)
+      const dGeo = new THREE.SphereGeometry(0.35, 6, 5);
+      dGeo.scale(1.4, 0.8, 0.8);
+      const dMat = new THREE.MeshLambertMaterial({ color: 0x8a5a3a });
+      const deer = new THREE.Mesh(dGeo, dMat);
+      deer.position.set(a.x, 0.4, a.z);
+      deer.castShadow = true;
+      scene.add(deer);
+      animalMeshes.push(deer);
+
+      // Deer head (small sphere)
+      const hGeo = new THREE.SphereGeometry(0.2, 6, 5);
+      const hMat = new THREE.MeshLambertMaterial({ color: 0x6a4a2a });
+      const head = new THREE.Mesh(hGeo, hMat);
+      head.position.set(a.x + 0.4, 0.55, a.z);
+      scene.add(head);
+      animalMeshes.push(head);
+
+      // Antlers (small cones)
+      const aGeo = new THREE.ConeGeometry(0.08, 0.4, 4);
+      const aMat = new THREE.MeshLambertMaterial({ color: 0x4a3a2a });
+      const ant1 = new THREE.Mesh(aGeo, aMat);
+      ant1.position.set(a.x + 0.4, 0.8, a.z + 0.12);
+      scene.add(ant1);
+      animalMeshes.push(ant1);
+      const ant2 = new THREE.Mesh(aGeo, aMat);
+      ant2.position.set(a.x + 0.4, 0.8, a.z - 0.12);
+      scene.add(ant2);
+      animalMeshes.push(ant2);
     }
   }
 }
@@ -280,7 +319,7 @@ function animate() {
     // Update 3D positions every frame
     const s = getState(WORLD);
     updateSeason(s.season);
-    updateCitizens(s.citizens);
+    updateCitizens(s.citizens, s.animals);
   }
 
   animTime += dt;

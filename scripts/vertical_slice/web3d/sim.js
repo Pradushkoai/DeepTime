@@ -78,6 +78,19 @@ function initWorld(archetype='FOREST', population=50, seed=42) {
     { type:'ELDERS', name:'Старейшины', power:35, grievance:0, grievanceReason:'' },
   ];
 
+  // Animals (deer) that wander around the map
+  world.animals = [];
+  for (let i = 0; i < 8; i++) {
+    world.animals.push({
+      id: i, type: 'deer', alive: true,
+      x: -8 + rng.random() * 16,
+      z: -8 + rng.random() * 16,
+      vx: (rng.random() - 0.5) * 0.5,
+      vz: (rng.random() - 0.5) * 0.5,
+      wanderTimer: rng.random() * 3,
+    });
+  }
+
   return world;
 }
 
@@ -135,6 +148,23 @@ function updateRealTime(w, dt) {
     updateCitizenRT(w, c, dt);
   }
 
+  // Update animals (wander around)
+  for (const a of w.animals) {
+    if (!a.alive) continue;
+    a.wanderTimer -= dt;
+    if (a.wanderTimer <= 0) {
+      // Change direction
+      a.vx = (Math.random() - 0.5) * 1.5;
+      a.vz = (Math.random() - 0.5) * 1.5;
+      a.wanderTimer = 2 + Math.random() * 3;
+    }
+    a.x += a.vx * dt;
+    a.z += a.vz * dt;
+    // Keep within bounds
+    a.x = Math.max(-14, Math.min(14, a.x));
+    a.z = Math.max(-14, Math.min(14, a.z));
+  }
+
   // Process pending events (non-blocking: they're shown as popups by UI)
   // Auto-resolve after 10 seconds if player doesn't choose
   for (let i = w.pendingEvents.length - 1; i >= 0; i--) {
@@ -168,13 +198,20 @@ function updateCitizenRT(w, c, dt) {
     c.workTimer += dt;
 
     // Produce resources while working
-    if (c.action === 'HUNT' && c.workTimer > 3.0) {
+    if (c.action === 'HUNT' && c.workTimer > 2.0) {
       c.workTimer = 0;
+      // Kill the target animal if still alive
+      if (c.huntTarget && c.huntTarget.alive) {
+        c.huntTarget.alive = false;
+        // Respawn after delay
+        setTimeout(() => { if (c.huntTarget) { c.huntTarget.alive = true; c.huntTarget.x = -10 + Math.random()*20; c.huntTarget.z = -10 + Math.random()*20; } }, 10000);
+      }
       const arch = ARCHETYPES[w.archetype];
       const succ = Math.min(1, c.huntSkill/60 + 0.4);
-      const meat = Math.max(1, Math.round(succ * 3 * arch.hunt * 2.5));
+      const meat = Math.max(2, Math.round(succ * 5 * arch.hunt * 2.5));
       w.settlement.meat += meat;
       c.carrying = { type: 'meat', amount: meat };
+      c.huntTarget = null;
       // Go to storage to drop off
       c.targetX = POI.storage.x + (Math.random()-0.5)*2;
       c.targetZ = POI.storage.z + (Math.random()-0.5)*2;
@@ -218,6 +255,10 @@ function updateCitizenRT(w, c, dt) {
       c.hunger = Math.max(0, c.hunger - 50);
       chooseActionRT(w, c);
     } else if (c.action === 'RITUAL' && c.workTimer > 4.0) {
+      c.workTimer = 0;
+      chooseActionRT(w, c);
+    } else if (c.action === 'IDLE' && c.workTimer > 1.0) {
+      // IDLE → choose new action after 1 second
       c.workTimer = 0;
       chooseActionRT(w, c);
     }
@@ -286,7 +327,23 @@ function chooseActionRT(w, c) {
   c.workTimer = 0;
 
   // Set target based on action
-  if (best === 'HUNT') { c.targetX = POI.forest.x + (Math.random()-0.5)*4; c.targetZ = POI.forest.z + (Math.random()-0.5)*4; }
+  if (best === 'HUNT') {
+    // Find nearest alive animal
+    const animals = w.animals.filter(a => a.alive);
+    if (animals.length > 0) {
+      let nearest = animals[0], minDist = 999;
+      for (const a of animals) {
+        const d = Math.sqrt((a.x - c.x)**2 + (a.z - c.z)**2);
+        if (d < minDist) { minDist = d; nearest = a; }
+      }
+      c.targetX = nearest.x;
+      c.targetZ = nearest.z;
+      c.huntTarget = nearest; // remember which animal
+    } else {
+      c.targetX = POI.forest.x + (Math.random()-0.5)*4;
+      c.targetZ = POI.forest.z + (Math.random()-0.5)*4;
+    }
+  }
   else if (best === 'GATHER') { c.targetX = POI.gather.x + (Math.random()-0.5)*4; c.targetZ = POI.gather.z + (Math.random()-0.5)*4; }
   else if (best === 'FISH') { c.targetX = POI.river.x + (Math.random()-0.5)*4; c.targetZ = POI.river.z + (Math.random()-0.5)*4; }
   else if (best === 'BUILD') { c.targetX = POI.build.x + (Math.random()-0.5)*3; c.targetZ = POI.build.z + (Math.random()-0.5)*3; }
@@ -559,6 +616,7 @@ function getState(w) {
     pendingEvents: w.pendingEvents.map(e => ({ id:e.id, title:e.title, text:e.text, priority:e.priority, choices:e.choices, timer:e.timer||15 })),
     metrics: w.metrics,
     citizens: ac.slice(0, 60).map(c => ({ x:c.x, z:c.z, action:c.action, hunger:c.hunger, age:c.age, carrying:!!c.carrying })),
+    animals: w.animals.filter(a => a.alive).map(a => ({ x:a.x, z:a.z })),
     gameOver: ac.length === 0,
     seasonProgress: w.seasonProgress,
     paused: w.paused,
