@@ -10,46 +10,49 @@
     "turns_played": 400,
     "years_simulated": 100,
     "population_start": 50,
-    "population_final": 110,
-    "population_change": 60,
-    "hungry_final": 0,
+    "population_final": 116,
+    "population_change": 66,
+    "hungry_final": 27,
     "winters_survived": 100,
-    "total_events": 340,
-    "total_decisions": 340,
-    "decisions_per_hour": 51.0,
-    "max_chief_pressure": 28,
-    "reforms_completed": 32,
-    "chief_age": 31,
-    "chief_era": "MATURE",
-    "chief_legitimacy": 80,
-    "chronicle_entries": 140
+    "total_events": 764,
+    "total_decisions": 764,
+    "decisions_per_hour": 114.6,
+    "max_chief_pressure": 100,
+    "reforms_completed": 25,
+    "chief_age": 28,
+    "chief_era": "YOUNG",
+    "chief_legitimacy": 15,
+    "chronicle_entries": 136
   },
   "events_by_type": {
-    "CHAMPION_PROPOSES": 32,
+    "CHAMPION_PROPOSES": 39,
     "WEDDING": 2,
     "WINTER_COMING": 49,
-    "RITUAL_OF_YEAR": 72,
-    "BIRTH_NOTABLE": 49,
-    "GOOD_HARVEST": 21,
-    "DEATH_ELDER": 115
+    "RITUAL_OF_YEAR": 74,
+    "BIRTH_NOTABLE": 52,
+    "HUNGER": 396,
+    "GOOD_HARVEST": 22,
+    "DEATH_ELDER": 85,
+    "CHIEF_DEATH": 24,
+    "FACTION_GRIEVANCE": 21
   },
   "death_causes": {
-    "старость": 119,
-    "хищник": 2,
-    "болезнь": 2
+    "вождь (передача власти)": 24,
+    "старость": 87,
+    "хищник": 1
   },
   "factions_final": {
     "Охотники": {
-      "power": 71,
-      "grievance": 0
+      "power": 26,
+      "grievance": 70
     },
     "Жречество": {
       "power": 15,
-      "grievance": 0
+      "grievance": 70
     },
     "Старейшины": {
-      "power": 53,
-      "grievance": 0
+      "power": 59,
+      "grievance": 65
     }
   },
   "verdict": {

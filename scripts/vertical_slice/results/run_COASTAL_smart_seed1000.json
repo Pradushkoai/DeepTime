@@ -10,56 +10,54 @@
     "turns_played": 400,
     "years_simulated": 100,
     "population_start": 50,
-    "population_final": 0,
-    "population_change": -50,
-    "hungry_final": 0,
+    "population_final": 87,
+    "population_change": 37,
+    "hungry_final": 23,
     "winters_survived": 100,
-    "total_events": 411,
-    "total_decisions": 411,
-    "decisions_per_hour": 61.65,
-    "max_chief_pressure": 100,
-    "reforms_completed": 42,
+    "total_events": 757,
+    "total_decisions": 757,
+    "decisions_per_hour": 113.55,
+    "max_chief_pressure": 19,
+    "reforms_completed": 52,
     "chief_age": 32,
     "chief_era": "MATURE",
-    "chief_legitimacy": 0,
-    "chronicle_entries": 93
+    "chief_legitimacy": 80,
+    "chronicle_entries": 150
   },
   "events_by_type": {
-    "BIRTH_NOTABLE": 36,
-    "WINTER_COMING": 51,
+    "BIRTH_NOTABLE": 55,
+    "WINTER_COMING": 58,
     "WEDDING": 2,
-    "CHAMPION_PROPOSES": 42,
-    "RITUAL_OF_YEAR": 75,
-    "GOOD_HARVEST": 24,
-    "DEATH_ELDER": 58,
-    "HUNGER": 102,
-    "CHIEF_DEATH": 9,
-    "FACTION_GRIEVANCE": 12
+    "CHAMPION_PROPOSES": 52,
+    "HUNGER": 396,
+    "RITUAL_OF_YEAR": 60,
+    "GOOD_HARVEST": 19,
+    "DEATH_ELDER": 115
   },
   "death_causes": {
-    "старость": 58,
-    "болезнь": 5,
-    "голод": 112
+    "старость": 118,
+    "хищник": 4,
+    "болезнь": 3
   },
   "factions_final": {
     "Охотники": {
-      "power": 100,
-      "grievance": 100
+      "power": 50,
+      "grievance": 0
     },
     "Жречество": {
       "power": 15,
-      "grievance": 100
+      "grievance": 0
     },
     "Старейшины": {
-      "power": 100,
-      "grievance": 100
+      "power": 63,
+      "grievance": 0
     }
   },
   "verdict": {
-    "tribe_survived": false,
-    "chief_alive": false,
-    "no_rebellions": false
+    "tribe_survived": true,
+    "chief_alive": true,
+    "no_rebellions": true
   },
-  "verdict_score": 0,
-  "verdict_label": "❌❌❌ гибель"
+  "verdict_score": 3,
+  "verdict_label": "✅✅✅ идеально"
 }

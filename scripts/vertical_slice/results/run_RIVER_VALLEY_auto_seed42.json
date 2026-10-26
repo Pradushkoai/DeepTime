@@ -10,57 +10,58 @@
     "turns_played": 400,
     "years_simulated": 100,
     "population_start": 50,
-    "population_final": 0,
-    "population_change": -50,
-    "hungry_final": 0,
+    "population_final": 85,
+    "population_change": 35,
+    "hungry_final": 62,
     "winters_survived": 100,
-    "total_events": 472,
-    "total_decisions": 472,
-    "decisions_per_hour": 70.8,
+    "total_events": 722,
+    "total_decisions": 722,
+    "decisions_per_hour": 108.3,
     "max_chief_pressure": 100,
-    "reforms_completed": 21,
-    "chief_age": 28,
+    "reforms_completed": 2,
+    "chief_age": 29,
     "chief_era": "YOUNG",
-    "chief_legitimacy": 0,
-    "chronicle_entries": 35
+    "chief_legitimacy": 15,
+    "chronicle_entries": 111
   },
   "events_by_type": {
-    "RITUAL_OF_YEAR": 69,
-    "WINTER_COMING": 49,
-    "BIRTH_NOTABLE": 18,
+    "RITUAL_OF_YEAR": 64,
+    "HUNGER": 396,
+    "WINTER_COMING": 48,
+    "BIRTH_NOTABLE": 63,
     "WEDDING": 2,
-    "DEATH_ELDER": 10,
-    "GOOD_HARVEST": 21,
-    "CHAMPION_PROPOSES": 21,
-    "HUNGER": 34,
-    "CHIEF_DEATH": 146,
-    "FACTION_GRIEVANCE": 102
+    "DEATH_ELDER": 70,
+    "GOOD_HARVEST": 23,
+    "CHAMPION_PROPOSES": 40,
+    "CHIEF_DEATH": 10,
+    "FACTION_GRIEVANCE": 6
   },
   "death_causes": {
-    "старость": 10,
-    "болезнь": 2,
+    "вождь (передача власти)": 10,
+    "старость": 69,
     "хищник": 1,
-    "голод": 87
+    "болезнь": 4,
+    "голод": 75
   },
   "factions_final": {
     "Охотники": {
-      "power": 20,
-      "grievance": 100
+      "power": 68,
+      "grievance": 63
     },
     "Жречество": {
       "power": 15,
-      "grievance": 100
+      "grievance": 63
     },
     "Старейшины": {
-      "power": 100,
-      "grievance": 100
+      "power": 48,
+      "grievance": 63
     }
   },
   "verdict": {
-    "tribe_survived": false,
-    "chief_alive": false,
-    "no_rebellions": false
+    "tribe_survived": true,
+    "chief_alive": true,
+    "no_rebellions": true
   },
-  "verdict_score": 0,
-  "verdict_label": "❌❌❌ гибель"
+  "verdict_score": 3,
+  "verdict_label": "✅✅✅ идеально"
 }

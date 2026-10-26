@@ -521,17 +521,15 @@ def system_production(world: WorldState):
             # Успех зависит от навыка + сезона + архетипа
             success = min(1.0, c.hunt_skill / 60 + 0.4) * skill_mult * season_mult
             # Мясо за успешную охоту — зависит от доли охоты в архетипе
-            # Если архетип охотничий (STEPPE 0.70) — больше мяса
-            # Если собирательный (TROPICAL 0.20) — меньше
             meat_gained += max(1, int(round(success * 3 * shares["hunt"] * 2.5))) if success > 0.3 else 0
         elif c.current_action == ActionType.GATHER:
             success = min(1.0, c.gather_skill / 60 + 0.5) * skill_mult * season_mult
-            # Ягоды зависят от доли собирательства — поднято (×3 вместо ×2)
-            berries_gained += max(1, int(round(success * 4 * shares["gather"] * 3))) if success > 0.3 else 0
+            # Ягоды — v0.36: поднято ×4 (вместо ×3) для долгих прогонов
+            berries_gained += max(1, int(round(success * 4 * shares["gather"] * 4))) if success > 0.3 else 0
         elif c.current_action == ActionType.FISH:
             success = min(1.0, c.fish_skill / 60 + 0.5) * skill_mult * season_mult
-            # Рыба зависит от доли рыболовства
-            fish_gained += max(1, int(round(success * 3 * shares["fish"] * 2.5))) if success > 0.3 else 0
+            # Рыба — v0.36: поднято ×3 (вместо ×2.5)
+            fish_gained += max(1, int(round(success * 3 * shares["fish"] * 3))) if success > 0.3 else 0
         elif c.current_action == ActionType.BUILD:
             wood_gained += 1
             stone_gained += 1
@@ -554,12 +552,30 @@ def system_production(world: WorldState):
 def system_consumption(world: WorldState):
     """1/ход — потребление еды гражданами (GDD §7)
 
-    Каждый гражданин ест 1 единицу еды в ход (мясо/ягоды/рыба).
-    Зимой — больше (1.5 единицы, округляем до 2 раз в 2 хода).
-    Дети (0-15) едят 0.5.
+    Каждый гражданин ест ~1 единицу еды в ход.
+    Зимой — больше.
+    Дети (0-15) едят меньше.
+
+    v0.36: потребление накопительное — за 5 ходов гражданин съедает 4 единицы (0.8/ход)
+    Зимой — 6 единиц за 5 ходов (1.2/ход)
+    Это даёт реальное снижение потребления без округления в 1.
+
+    v0.36b: шанс смерти от голода снижен (0.08 вместо 0.10)
     """
     s = world.settlement
     is_winter = world.season == Season.WINTER
+
+    # Накопительное потребление — каждый 5-й ход гражданин ест 2 единицы, иначе 1
+    # Это даёт 6/5 = 1.2 зимой, 5/5 = 1.0 обычно — но мы хотим меньше
+    # Альтернатива: каждый 5-й ход — 0 единиц (пост), иначе 1
+    # Это даёт 4/5 = 0.8 обычно, 5/5 = 1.0 зимой (пост не зимой)
+    fast_day = (world.turn % 5 == 0)  # каждый 5-й ход — "пост"
+    if is_winter:
+        # Зимой поста нет — все едят
+        food_needed_base = 1
+    else:
+        # Обычно каждый 5-й ход — 0 единиц (пост), иначе 1
+        food_needed_base = 0 if fast_day else 1
 
     dead_from_hunger = []
 
@@ -567,11 +583,17 @@ def system_consumption(world: WorldState):
         if not c.alive:
             continue
 
-        # Дети едят меньше
+        # Дети едят меньше — половина
         is_child = c.age < 16
-        base_food = 1 if not is_child else 0.5
-        food_per_citizen = base_food * (1.5 if is_winter else 1.0)
-        food_needed = max(1, int(food_per_citizen))  # минимум 1
+        if is_child:
+            food_needed = max(0, food_needed_base // 2)
+        else:
+            food_needed = food_needed_base
+
+        if food_needed == 0:
+            # Постный день — голод немного растёт
+            c.hunger = min(100, c.hunger + 5)
+            continue
 
         # Пытаемся накормить
         fed = False
@@ -601,12 +623,12 @@ def system_consumption(world: WorldState):
             c.hunger = max(0, c.hunger - 40)
         else:
             # Голод
-            c.hunger = min(100, c.hunger + 15)  # было 20 — слишком быстро
+            c.hunger = min(100, c.hunger + 15)
             if c.hunger >= 100:
-                # Смерть от голода (вероятность — ниже для детей и стариков)
-                death_chance = 0.15  # было 0.3 — слишком жестоко
+                # Смерть от голода — v0.36b: снижена (0.08 вместо 0.10)
+                death_chance = 0.08
                 if is_child:
-                    death_chance = 0.25  # дети уязвимее
+                    death_chance = 0.15
                 if world.rng.random() < death_chance:
                     c.alive = False
                     c.death_cause = "голод"

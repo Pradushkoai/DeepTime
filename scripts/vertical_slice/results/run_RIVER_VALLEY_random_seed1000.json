@@ -10,56 +10,55 @@
     "turns_played": 400,
     "years_simulated": 100,
     "population_start": 50,
-    "population_final": 0,
-    "population_change": -50,
-    "hungry_final": 0,
+    "population_final": 81,
+    "population_change": 31,
+    "hungry_final": 55,
     "winters_survived": 100,
-    "total_events": 456,
-    "total_decisions": 456,
-    "decisions_per_hour": 68.39999999999999,
-    "max_chief_pressure": 100,
-    "reforms_completed": 17,
+    "total_events": 743,
+    "total_decisions": 743,
+    "decisions_per_hour": 111.44999999999999,
+    "max_chief_pressure": 62,
+    "reforms_completed": 25,
     "chief_age": 32,
     "chief_era": "MATURE",
-    "chief_legitimacy": 0,
-    "chronicle_entries": 83
+    "chief_legitimacy": 80,
+    "chronicle_entries": 97
   },
   "events_by_type": {
-    "WINTER_COMING": 47,
-    "RITUAL_OF_YEAR": 67,
-    "BIRTH_NOTABLE": 33,
-    "GOOD_HARVEST": 16,
-    "DEATH_ELDER": 57,
-    "CHAMPION_PROPOSES": 31,
-    "HUNGER": 70,
-    "FACTION_GRIEVANCE": 90,
-    "CHIEF_DEATH": 45
+    "WINTER_COMING": 44,
+    "RITUAL_OF_YEAR": 61,
+    "BIRTH_NOTABLE": 50,
+    "HUNGER": 396,
+    "WEDDING": 3,
+    "DEATH_ELDER": 109,
+    "CHAMPION_PROPOSES": 41,
+    "GOOD_HARVEST": 20,
+    "FACTION_GRIEVANCE": 19
   },
   "death_causes": {
-    "старость": 57,
-    "болезнь": 3,
-    "голод": 119,
-    "хищник": 1
+    "старость": 110,
+    "хищник": 1,
+    "голод": 31
   },
   "factions_final": {
     "Охотники": {
-      "power": 100,
-      "grievance": 100
+      "power": 66,
+      "grievance": 0
     },
     "Жречество": {
       "power": 15,
       "grievance": 100
     },
     "Старейшины": {
-      "power": 100,
-      "grievance": 100
+      "power": 48,
+      "grievance": 0
     }
   },
   "verdict": {
-    "tribe_survived": false,
-    "chief_alive": false,
+    "tribe_survived": true,
+    "chief_alive": true,
     "no_rebellions": false
   },
-  "verdict_score": 0,
-  "verdict_label": "❌❌❌ гибель"
+  "verdict_score": 2,
+  "verdict_label": "✅⚠️❌ выжили с проблемами"
 }

@@ -12,12 +12,12 @@
     "population_start": 50,
     "population_final": 106,
     "population_change": 56,
-    "hungry_final": 0,
+    "hungry_final": 21,
     "winters_survived": 100,
-    "total_events": 343,
-    "total_decisions": 343,
-    "decisions_per_hour": 51.449999999999996,
-    "max_chief_pressure": 62,
+    "total_events": 739,
+    "total_decisions": 739,
+    "decisions_per_hour": 110.85,
+    "max_chief_pressure": 19,
     "reforms_completed": 41,
     "chief_age": 32,
     "chief_era": "MATURE",
@@ -28,6 +28,7 @@
     "WINTER_COMING": 45,
     "CHAMPION_PROPOSES": 41,
     "RITUAL_OF_YEAR": 59,
+    "HUNGER": 396,
     "GOOD_HARVEST": 19,
     "WEDDING": 2,
     "BIRTH_NOTABLE": 63,
@@ -40,7 +41,7 @@
   },
   "factions_final": {
     "Охотники": {
-      "power": 73,
+      "power": 88,
       "grievance": 0
     },
     "Жречество": {

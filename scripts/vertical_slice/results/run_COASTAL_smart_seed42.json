@@ -10,56 +10,54 @@
     "turns_played": 400,
     "years_simulated": 100,
     "population_start": 50,
-    "population_final": 0,
-    "population_change": -50,
-    "hungry_final": 0,
+    "population_final": 74,
+    "population_change": 24,
+    "hungry_final": 51,
     "winters_survived": 100,
-    "total_events": 606,
-    "total_decisions": 606,
-    "decisions_per_hour": 90.89999999999999,
-    "max_chief_pressure": 100,
-    "reforms_completed": 28,
+    "total_events": 748,
+    "total_decisions": 748,
+    "decisions_per_hour": 112.19999999999999,
+    "max_chief_pressure": 20,
+    "reforms_completed": 38,
     "chief_age": 27,
     "chief_era": "YOUNG",
-    "chief_legitimacy": 0,
-    "chronicle_entries": 88
+    "chief_legitimacy": 80,
+    "chronicle_entries": 133
   },
   "events_by_type": {
-    "WINTER_COMING": 53,
-    "CHAMPION_PROPOSES": 28,
-    "RITUAL_OF_YEAR": 71,
-    "BIRTH_NOTABLE": 34,
-    "DEATH_ELDER": 49,
-    "GOOD_HARVEST": 18,
-    "HUNGER": 84,
-    "CHIEF_DEATH": 71,
-    "FACTION_GRIEVANCE": 198
+    "HUNGER": 396,
+    "WINTER_COMING": 52,
+    "CHAMPION_PROPOSES": 38,
+    "RITUAL_OF_YEAR": 64,
+    "BIRTH_NOTABLE": 72,
+    "DEATH_ELDER": 104,
+    "GOOD_HARVEST": 22
   },
   "death_causes": {
-    "старость": 49,
-    "болезнь": 9,
-    "хищник": 3,
-    "голод": 123
+    "старость": 108,
+    "хищник": 2,
+    "болезнь": 1,
+    "голод": 21
   },
   "factions_final": {
     "Охотники": {
-      "power": 100,
-      "grievance": 100
+      "power": 80,
+      "grievance": 0
     },
     "Жречество": {
       "power": 15,
-      "grievance": 100
+      "grievance": 0
     },
     "Старейшины": {
-      "power": 100,
-      "grievance": 100
+      "power": 69,
+      "grievance": 0
     }
   },
   "verdict": {
-    "tribe_survived": false,
-    "chief_alive": false,
-    "no_rebellions": false
+    "tribe_survived": true,
+    "chief_alive": true,
+    "no_rebellions": true
   },
-  "verdict_score": 0,
-  "verdict_label": "❌❌❌ гибель"
+  "verdict_score": 3,
+  "verdict_label": "✅✅✅ идеально"
 }

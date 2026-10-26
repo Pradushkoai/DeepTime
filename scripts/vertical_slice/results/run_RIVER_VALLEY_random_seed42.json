@@ -10,57 +10,55 @@
     "turns_played": 400,
     "years_simulated": 100,
     "population_start": 50,
-    "population_final": 0,
-    "population_change": -50,
-    "hungry_final": 0,
+    "population_final": 119,
+    "population_change": 69,
+    "hungry_final": 83,
     "winters_survived": 100,
-    "total_events": 458,
-    "total_decisions": 458,
-    "decisions_per_hour": 68.7,
-    "max_chief_pressure": 100,
-    "reforms_completed": 13,
+    "total_events": 786,
+    "total_decisions": 786,
+    "decisions_per_hour": 117.89999999999999,
+    "max_chief_pressure": 89,
+    "reforms_completed": 23,
     "chief_age": 28,
     "chief_era": "YOUNG",
-    "chief_legitimacy": 0,
-    "chronicle_entries": 65
+    "chief_legitimacy": 45,
+    "chronicle_entries": 110
   },
   "events_by_type": {
-    "RITUAL_OF_YEAR": 79,
-    "BIRTH_NOTABLE": 29,
+    "RITUAL_OF_YEAR": 78,
+    "BIRTH_NOTABLE": 62,
+    "HUNGER": 396,
+    "GOOD_HARVEST": 23,
+    "CHAMPION_PROPOSES": 44,
+    "WEDDING": 2,
     "WINTER_COMING": 52,
-    "WEDDING": 3,
-    "DEATH_ELDER": 57,
-    "FACTION_GRIEVANCE": 81,
-    "CHAMPION_PROPOSES": 35,
-    "GOOD_HARVEST": 20,
-    "HUNGER": 73,
-    "CHIEF_DEATH": 29
+    "DEATH_ELDER": 98,
+    "FACTION_GRIEVANCE": 31
   },
   "death_causes": {
-    "старость": 57,
-    "хищник": 2,
-    "голод": 78,
-    "болезнь": 2
+    "старость": 100,
+    "хищник": 5,
+    "голод": 27
   },
   "factions_final": {
     "Охотники": {
-      "power": 20,
-      "grievance": 100
+      "power": 100,
+      "grievance": 3
     },
     "Жречество": {
       "power": 15,
-      "grievance": 100
+      "grievance": 70
     },
     "Старейшины": {
-      "power": 100,
-      "grievance": 90
+      "power": 53,
+      "grievance": 3
     }
   },
   "verdict": {
-    "tribe_survived": false,
-    "chief_alive": false,
-    "no_rebellions": false
+    "tribe_survived": true,
+    "chief_alive": true,
+    "no_rebellions": true
   },
-  "verdict_score": 0,
-  "verdict_label": "❌❌❌ гибель"
+  "verdict_score": 3,
+  "verdict_label": "✅✅✅ идеально"
 }

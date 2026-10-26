@@ -10,58 +10,57 @@
     "turns_played": 400,
     "years_simulated": 100,
     "population_start": 50,
-    "population_final": 0,
-    "population_change": -50,
-    "hungry_final": 0,
+    "population_final": 112,
+    "population_change": 62,
+    "hungry_final": 74,
     "winters_survived": 100,
-    "total_events": 454,
-    "total_decisions": 454,
-    "decisions_per_hour": 68.1,
+    "total_events": 785,
+    "total_decisions": 785,
+    "decisions_per_hour": 117.75,
     "max_chief_pressure": 100,
     "reforms_completed": 17,
-    "chief_age": 19,
-    "chief_era": "YOUNG",
-    "chief_legitimacy": 0,
-    "chronicle_entries": 66
+    "chief_age": 37,
+    "chief_era": "MATURE",
+    "chief_legitimacy": 15,
+    "chronicle_entries": 118
   },
   "events_by_type": {
-    "CHAMPION_PROPOSES": 26,
+    "CHAMPION_PROPOSES": 41,
     "WEDDING": 6,
-    "RITUAL_OF_YEAR": 64,
-    "BIRTH_NOTABLE": 19,
-    "WINTER_COMING": 48,
-    "DEATH_ELDER": 26,
-    "GOOD_HARVEST": 17,
-    "HUNGER": 56,
-    "CHIEF_DEATH": 111,
-    "FACTION_GRIEVANCE": 81
+    "HUNGER": 396,
+    "RITUAL_OF_YEAR": 71,
+    "BIRTH_NOTABLE": 58,
+    "WINTER_COMING": 52,
+    "CHIEF_DEATH": 41,
+    "GOOD_HARVEST": 25,
+    "DEATH_ELDER": 54,
+    "FACTION_GRIEVANCE": 41
   },
   "death_causes": {
-    "вождь (передача власти)": 7,
-    "старость": 26,
-    "болезнь": 3,
-    "голод": 86,
-    "хищник": 1
+    "вождь (передача власти)": 41,
+    "старость": 55,
+    "хищник": 5,
+    "голод": 74
   },
   "factions_final": {
     "Охотники": {
-      "power": 100,
-      "grievance": 70
+      "power": 53,
+      "grievance": 62
     },
     "Жречество": {
       "power": 15,
-      "grievance": 70
+      "grievance": 62
     },
     "Старейшины": {
-      "power": 100,
-      "grievance": 70
+      "power": 38,
+      "grievance": 63
     }
   },
   "verdict": {
-    "tribe_survived": false,
-    "chief_alive": false,
+    "tribe_survived": true,
+    "chief_alive": true,
     "no_rebellions": true
   },
-  "verdict_score": 1,
-  "verdict_label": "⚠️❌❌ тяжело"
+  "verdict_score": 3,
+  "verdict_label": "✅✅✅ идеально"
 }
