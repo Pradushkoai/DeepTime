@@ -4,59 +4,63 @@
     "strategy": "smart",
     "archetype": "TROPICAL",
     "population": 50,
-    "turns": 100
+    "turns": 400
   },
   "summary": {
-    "turns_played": 100,
-    "years_simulated": 25,
+    "turns_played": 400,
+    "years_simulated": 100,
     "population_start": 50,
-    "population_final": 89,
-    "population_change": 39,
-    "hungry_final": 11,
-    "winters_survived": 25,
-    "total_events": 77,
-    "total_decisions": 77,
-    "decisions_per_hour": 46.199999999999996,
-    "max_chief_pressure": 67,
-    "reforms_completed": 10,
+    "population_final": 0,
+    "population_change": -50,
+    "hungry_final": 0,
+    "winters_survived": 100,
+    "total_events": 628,
+    "total_decisions": 628,
+    "decisions_per_hour": 94.2,
+    "max_chief_pressure": 100,
+    "reforms_completed": 39,
     "chief_age": 26,
     "chief_era": "YOUNG",
-    "chief_legitimacy": 80,
-    "chronicle_entries": 11
+    "chief_legitimacy": 0,
+    "chronicle_entries": 75
   },
   "events_by_type": {
-    "CHAMPION_PROPOSES": 10,
-    "WINTER_COMING": 12,
-    "BIRTH_NOTABLE": 18,
-    "RITUAL_OF_YEAR": 16,
-    "GOOD_HARVEST": 9,
+    "CHAMPION_PROPOSES": 39,
+    "WINTER_COMING": 52,
+    "BIRTH_NOTABLE": 25,
+    "RITUAL_OF_YEAR": 71,
+    "GOOD_HARVEST": 27,
     "WEDDING": 2,
-    "DEATH_ELDER": 6,
-    "HUNGER": 4
+    "DEATH_ELDER": 40,
+    "HUNGER": 103,
+    "CHIEF_DEATH": 71,
+    "FACTION_GRIEVANCE": 198
   },
   "death_causes": {
-    "старость": 8,
-    "голод": 9
+    "старость": 40,
+    "болезнь": 6,
+    "хищник": 3,
+    "голод": 132
   },
   "factions_final": {
     "Охотники": {
-      "power": 88,
-      "grievance": 0
+      "power": 100,
+      "grievance": 100
     },
     "Жречество": {
       "power": 15,
-      "grievance": 0
+      "grievance": 100
     },
     "Старейшины": {
-      "power": 41,
-      "grievance": 0
+      "power": 100,
+      "grievance": 100
     }
   },
   "verdict": {
-    "tribe_survived": true,
-    "chief_alive": true,
-    "no_rebellions": true
+    "tribe_survived": false,
+    "chief_alive": false,
+    "no_rebellions": false
   },
-  "verdict_score": 3,
-  "verdict_label": "✅✅✅ идеально"
+  "verdict_score": 0,
+  "verdict_label": "❌❌❌ гибель"
 }

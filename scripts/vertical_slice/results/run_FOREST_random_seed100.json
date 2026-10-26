@@ -4,58 +4,62 @@
     "strategy": "random",
     "archetype": "FOREST",
     "population": 50,
-    "turns": 100
+    "turns": 400
   },
   "summary": {
-    "turns_played": 100,
-    "years_simulated": 25,
+    "turns_played": 400,
+    "years_simulated": 100,
     "population_start": 50,
-    "population_final": 98,
-    "population_change": 48,
+    "population_final": 94,
+    "population_change": 44,
     "hungry_final": 0,
-    "winters_survived": 25,
-    "total_events": 66,
-    "total_decisions": 66,
-    "decisions_per_hour": 39.6,
+    "winters_survived": 100,
+    "total_events": 385,
+    "total_decisions": 385,
+    "decisions_per_hour": 57.75,
     "max_chief_pressure": 40,
-    "reforms_completed": 7,
+    "reforms_completed": 19,
     "chief_age": 31,
     "chief_era": "MATURE",
-    "chief_legitimacy": 90,
-    "chronicle_entries": 22
+    "chief_legitimacy": 65,
+    "chronicle_entries": 115
   },
   "events_by_type": {
-    "CHAMPION_PROPOSES": 14,
-    "WINTER_COMING": 8,
+    "CHAMPION_PROPOSES": 45,
+    "WINTER_COMING": 47,
     "WEDDING": 3,
-    "BIRTH_NOTABLE": 12,
-    "RITUAL_OF_YEAR": 17,
-    "DEATH_ELDER": 6,
-    "GOOD_HARVEST": 5,
-    "FACTION_GRIEVANCE": 1
+    "BIRTH_NOTABLE": 54,
+    "RITUAL_OF_YEAR": 71,
+    "DEATH_ELDER": 103,
+    "GOOD_HARVEST": 23,
+    "FACTION_GRIEVANCE": 32,
+    "HUNGER": 7
   },
   "death_causes": {
-    "старость": 6
+    "старость": 107,
+    "болезнь": 4,
+    "хищник": 2,
+    "голод": 18
   },
   "factions_final": {
     "Охотники": {
-      "power": 52,
+      "power": 92,
       "grievance": 0
     },
     "Жречество": {
       "power": 15,
-      "grievance": 70
+      "grievance": 90
     },
     "Старейшины": {
-      "power": 47,
+      "power": 69,
       "grievance": 0
     }
   },
   "verdict": {
     "tribe_survived": true,
     "chief_alive": true,
-    "no_rebellions": true
+    "no_rebellions": false
   },
-  "verdict_score": 3,
-  "verdict_label": "✅✅✅ идеально"
+  "verdict_score": 2,
+  "verdict_label": "✅⚠️❌ выжили с проблемами"
 }

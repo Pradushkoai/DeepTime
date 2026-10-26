@@ -4,42 +4,43 @@
     "strategy": "smart",
     "archetype": "ARCTIC",
     "population": 50,
-    "turns": 100
+    "turns": 400
   },
   "summary": {
-    "turns_played": 100,
-    "years_simulated": 25,
+    "turns_played": 400,
+    "years_simulated": 100,
     "population_start": 50,
-    "population_final": 94,
-    "population_change": 44,
+    "population_final": 116,
+    "population_change": 66,
     "hungry_final": 0,
-    "winters_survived": 25,
-    "total_events": 83,
-    "total_decisions": 83,
-    "decisions_per_hour": 49.8,
-    "max_chief_pressure": 25,
-    "reforms_completed": 9,
+    "winters_survived": 100,
+    "total_events": 347,
+    "total_decisions": 347,
+    "decisions_per_hour": 52.05,
+    "max_chief_pressure": 78,
+    "reforms_completed": 37,
     "chief_age": 27,
     "chief_era": "YOUNG",
     "chief_legitimacy": 80,
-    "chronicle_entries": 17
+    "chronicle_entries": 134
   },
   "events_by_type": {
     "WEDDING": 4,
-    "GOOD_HARVEST": 3,
-    "WINTER_COMING": 16,
-    "RITUAL_OF_YEAR": 17,
-    "BIRTH_NOTABLE": 24,
-    "DEATH_ELDER": 10,
-    "CHAMPION_PROPOSES": 9
+    "GOOD_HARVEST": 20,
+    "WINTER_COMING": 48,
+    "RITUAL_OF_YEAR": 65,
+    "BIRTH_NOTABLE": 71,
+    "DEATH_ELDER": 102,
+    "CHAMPION_PROPOSES": 37
   },
   "death_causes": {
-    "старость": 10,
-    "болезнь": 1
+    "старость": 104,
+    "болезнь": 3,
+    "хищник": 3
   },
   "factions_final": {
     "Охотники": {
-      "power": 46,
+      "power": 71,
       "grievance": 0
     },
     "Жречество": {
@@ -47,7 +48,7 @@
       "grievance": 0
     },
     "Старейшины": {
-      "power": 37,
+      "power": 63,
       "grievance": 0
     }
   },

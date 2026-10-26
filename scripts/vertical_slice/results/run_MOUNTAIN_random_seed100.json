@@ -4,58 +4,60 @@
     "strategy": "random",
     "archetype": "MOUNTAIN",
     "population": 50,
-    "turns": 100
+    "turns": 400
   },
   "summary": {
-    "turns_played": 100,
-    "years_simulated": 25,
+    "turns_played": 400,
+    "years_simulated": 100,
     "population_start": 50,
-    "population_final": 93,
-    "population_change": 43,
+    "population_final": 101,
+    "population_change": 51,
     "hungry_final": 0,
-    "winters_survived": 25,
-    "total_events": 61,
-    "total_decisions": 61,
-    "decisions_per_hour": 36.6,
-    "max_chief_pressure": 23,
-    "reforms_completed": 5,
+    "winters_survived": 100,
+    "total_events": 374,
+    "total_decisions": 374,
+    "decisions_per_hour": 56.099999999999994,
+    "max_chief_pressure": 70,
+    "reforms_completed": 23,
     "chief_age": 31,
     "chief_era": "MATURE",
-    "chief_legitimacy": 100,
-    "chronicle_entries": 17
+    "chief_legitimacy": 90,
+    "chronicle_entries": 119
   },
   "events_by_type": {
-    "CHAMPION_PROPOSES": 10,
+    "CHAMPION_PROPOSES": 45,
     "WEDDING": 4,
-    "BIRTH_NOTABLE": 18,
-    "RITUAL_OF_YEAR": 12,
-    "WINTER_COMING": 6,
-    "GOOD_HARVEST": 3,
-    "DEATH_ELDER": 8
+    "BIRTH_NOTABLE": 66,
+    "RITUAL_OF_YEAR": 65,
+    "WINTER_COMING": 40,
+    "GOOD_HARVEST": 18,
+    "DEATH_ELDER": 103,
+    "FACTION_GRIEVANCE": 33
   },
   "death_causes": {
-    "старость": 9,
-    "болезнь": 1
+    "старость": 105,
+    "болезнь": 4,
+    "хищник": 4
   },
   "factions_final": {
     "Охотники": {
-      "power": 55,
+      "power": 81,
       "grievance": 0
     },
     "Жречество": {
       "power": 15,
-      "grievance": 60
+      "grievance": 100
     },
     "Старейшины": {
-      "power": 46,
+      "power": 70,
       "grievance": 0
     }
   },
   "verdict": {
     "tribe_survived": true,
     "chief_alive": true,
-    "no_rebellions": true
+    "no_rebellions": false
   },
-  "verdict_score": 3,
-  "verdict_label": "✅✅✅ идеально"
+  "verdict_score": 2,
+  "verdict_label": "✅⚠️❌ выжили с проблемами"
 }

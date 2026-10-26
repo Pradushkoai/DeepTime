@@ -4,58 +4,63 @@
     "strategy": "random",
     "archetype": "RIVER_VALLEY",
     "population": 50,
-    "turns": 100
+    "turns": 400
   },
   "summary": {
-    "turns_played": 100,
-    "years_simulated": 25,
+    "turns_played": 400,
+    "years_simulated": 100,
     "population_start": 50,
-    "population_final": 90,
-    "population_change": 40,
+    "population_final": 0,
+    "population_change": -50,
     "hungry_final": 0,
-    "winters_survived": 25,
-    "total_events": 80,
-    "total_decisions": 80,
-    "decisions_per_hour": 48.0,
-    "max_chief_pressure": 41,
-    "reforms_completed": 2,
+    "winters_survived": 100,
+    "total_events": 458,
+    "total_decisions": 458,
+    "decisions_per_hour": 68.7,
+    "max_chief_pressure": 100,
+    "reforms_completed": 13,
     "chief_age": 28,
     "chief_era": "YOUNG",
-    "chief_legitimacy": 65,
-    "chronicle_entries": 15
+    "chief_legitimacy": 0,
+    "chronicle_entries": 65
   },
   "events_by_type": {
-    "RITUAL_OF_YEAR": 21,
-    "BIRTH_NOTABLE": 20,
-    "WINTER_COMING": 11,
+    "RITUAL_OF_YEAR": 79,
+    "BIRTH_NOTABLE": 29,
+    "WINTER_COMING": 52,
     "WEDDING": 3,
-    "DEATH_ELDER": 6,
-    "FACTION_GRIEVANCE": 9,
-    "CHAMPION_PROPOSES": 7,
-    "GOOD_HARVEST": 3
+    "DEATH_ELDER": 57,
+    "FACTION_GRIEVANCE": 81,
+    "CHAMPION_PROPOSES": 35,
+    "GOOD_HARVEST": 20,
+    "HUNGER": 73,
+    "CHIEF_DEATH": 29
   },
   "death_causes": {
-    "старость": 6
+    "старость": 57,
+    "хищник": 2,
+    "голод": 78,
+    "болезнь": 2
   },
   "factions_final": {
     "Охотники": {
       "power": 20,
-      "grievance": 0
+      "grievance": 100
     },
     "Жречество": {
       "power": 15,
-      "grievance": 90
+      "grievance": 100
     },
     "Старейшины": {
-      "power": 48,
-      "grievance": 0
+      "power": 100,
+      "grievance": 90
     }
   },
   "verdict": {
-    "tribe_survived": true,
-    "chief_alive": true,
+    "tribe_survived": false,
+    "chief_alive": false,
     "no_rebellions": false
   },
-  "verdict_score": 2,
-  "verdict_label": "✅⚠️❌ выжили с проблемами"
+  "verdict_score": 0,
+  "verdict_label": "❌❌❌ гибель"
 }

@@ -4,58 +4,62 @@
     "strategy": "random",
     "archetype": "FOREST",
     "population": 50,
-    "turns": 100
+    "turns": 400
   },
   "summary": {
-    "turns_played": 100,
-    "years_simulated": 25,
+    "turns_played": 400,
+    "years_simulated": 100,
     "population_start": 50,
-    "population_final": 108,
-    "population_change": 58,
+    "population_final": 81,
+    "population_change": 31,
     "hungry_final": 0,
-    "winters_survived": 25,
-    "total_events": 64,
-    "total_decisions": 64,
-    "decisions_per_hour": 38.4,
+    "winters_survived": 100,
+    "total_events": 402,
+    "total_decisions": 402,
+    "decisions_per_hour": 60.3,
     "max_chief_pressure": 48,
-    "reforms_completed": 7,
+    "reforms_completed": 21,
     "chief_age": 27,
     "chief_era": "YOUNG",
-    "chief_legitimacy": 90,
-    "chronicle_entries": 10
+    "chief_legitimacy": 35,
+    "chronicle_entries": 116
   },
   "events_by_type": {
-    "CHAMPION_PROPOSES": 11,
-    "GOOD_HARVEST": 6,
-    "RITUAL_OF_YEAR": 15,
+    "CHAMPION_PROPOSES": 38,
+    "GOOD_HARVEST": 26,
+    "RITUAL_OF_YEAR": 76,
     "WEDDING": 3,
-    "BIRTH_NOTABLE": 13,
-    "WINTER_COMING": 13,
-    "DEATH_ELDER": 2,
-    "FACTION_GRIEVANCE": 1
+    "BIRTH_NOTABLE": 69,
+    "WINTER_COMING": 45,
+    "DEATH_ELDER": 111,
+    "FACTION_GRIEVANCE": 27,
+    "HUNGER": 7
   },
   "death_causes": {
-    "старость": 2
+    "старость": 113,
+    "хищник": 2,
+    "болезнь": 1,
+    "голод": 9
   },
   "factions_final": {
     "Охотники": {
-      "power": 45,
+      "power": 100,
       "grievance": 0
     },
     "Жречество": {
       "power": 15,
-      "grievance": 90
+      "grievance": 70
     },
     "Старейшины": {
-      "power": 38,
+      "power": 58,
       "grievance": 0
     }
   },
   "verdict": {
     "tribe_survived": true,
     "chief_alive": true,
-    "no_rebellions": false
+    "no_rebellions": true
   },
-  "verdict_score": 2,
-  "verdict_label": "✅⚠️❌ выжили с проблемами"
+  "verdict_score": 3,
+  "verdict_label": "✅✅✅ идеально"
 }
